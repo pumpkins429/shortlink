@@ -5,7 +5,7 @@ import com.pumpkins.shortlink.admin.common.convention.errorcode.IErrorCode;
 /*
  * @author      : pumpkins
  * @date        : 2024/7/11 18:46
- * @description : ...
+ * @description : 用户异常码
  * @Copyright   : ...
  */
 public enum UserErrorCodeEnum implements IErrorCode {
@@ -27,7 +27,7 @@ public enum UserErrorCodeEnum implements IErrorCode {
      */
     @Override
     public String code() {
-        return null;
+        return code;
     }
 
     /**
@@ -35,6 +35,6 @@ public enum UserErrorCodeEnum implements IErrorCode {
      */
     @Override
     public String message() {
-        return null;
+        return message;
     }
 }

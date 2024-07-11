@@ -44,6 +44,10 @@ public class Result<T> implements Serializable {
      */
     private String requestId;
 
+    /**
+     * json序列化会自动生成success字段
+     * @return
+     */
     public boolean isSuccess() {
         return SUCCESS_CODE.equals(code);
     }

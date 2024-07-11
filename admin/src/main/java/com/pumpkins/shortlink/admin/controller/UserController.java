@@ -8,6 +8,8 @@ package com.pumpkins.shortlink.admin.controller;
  */
 
 import com.pumpkins.shortlink.admin.common.convention.result.Result;
+import com.pumpkins.shortlink.admin.common.convention.result.Results;
+import com.pumpkins.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 import com.pumpkins.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +32,9 @@ public class UserController {
     public Result<UserRespDTO> getUserByUserName(@PathVariable("username") String username) {
         UserRespDTO result = userService.getUserByUserName(username);
         if (null == result) {
-            return new Result<UserRespDTO>().setCode("-1").setMessage("用户查询为空");
+            return new Result<UserRespDTO>().setCode(UserErrorCodeEnum.USER_NULL.code()).setMessage(UserErrorCodeEnum.USER_NULL.message());
         } else {
-            return new Result<UserRespDTO>().setCode("0").setData(result);
+            return Results.success(result);
         }
     }
 
