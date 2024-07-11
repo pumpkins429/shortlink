@@ -1,17 +1,15 @@
 package com.pumpkins.shortlink.admin.dto.resp;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.pumpkins.shortlink.admin.common.serialize.PhoneDesensitizationSerializer;
 import lombok.Data;
 
 /*
  * @author      : pumpkins
  * @date        : 2024/7/11 15:37
- * @description : 用户返回参数实体
+ * @description : 用户返回参数实体 (无脱敏
  * @Copyright   : ...
  */
 @Data
-public class UserRespDTO {
+public class UserActualRespDTO {
 
     /**
      * id
@@ -36,7 +34,6 @@ public class UserRespDTO {
     /**
      * 手机号
      */
-    @JsonSerialize(using = PhoneDesensitizationSerializer.class)
     private String phone;
 
     /**

@@ -12,7 +12,7 @@ import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 
 public interface UserService extends IService<UserDO> {
     /**
-     * 更具用户名返回用户信息
+     * 根据用户名返回用户信息
      * @param username 用户名
      * @return 用户返回实体
      */

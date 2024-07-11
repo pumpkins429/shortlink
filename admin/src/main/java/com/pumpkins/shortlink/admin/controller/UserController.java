@@ -7,9 +7,10 @@ package com.pumpkins.shortlink.admin.controller;
  * @Copyright   : ...
  */
 
+import cn.hutool.core.bean.BeanUtil;
 import com.pumpkins.shortlink.admin.common.convention.result.Result;
 import com.pumpkins.shortlink.admin.common.convention.result.Results;
-import com.pumpkins.shortlink.admin.common.enums.UserErrorCodeEnum;
+import com.pumpkins.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 import com.pumpkins.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +31,17 @@ public class UserController {
      */
     @GetMapping("/api/short-link/v1/user/{username}")
     public Result<UserRespDTO> getUserByUserName(@PathVariable("username") String username) {
-        UserRespDTO result = userService.getUserByUserName(username);
-        if (null == result) {
-            return new Result<UserRespDTO>().setCode(UserErrorCodeEnum.USER_NULL.code()).setMessage(UserErrorCodeEnum.USER_NULL.message());
-        } else {
-            return Results.success(result);
-        }
+        return Results.success(userService.getUserByUserName(username));
+    }
+
+    /**
+     * 根据用户名查询用户信息 （无脱敏
+     * @param username
+     * @return
+     */
+    @GetMapping("/api/short-link/v1/actual/user/{username}")
+    public Result<UserActualRespDTO> getActualUserByUserName(@PathVariable("username") String username) {
+        return Results.success(BeanUtil.toBean(userService.getUserByUserName(username), UserActualRespDTO.class));
     }
 
 }
