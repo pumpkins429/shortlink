@@ -1,4 +1,4 @@
-package com.pumpkins.shortlink.admin.common.result;
+package com.pumpkins.shortlink.admin.common.convention.result;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
