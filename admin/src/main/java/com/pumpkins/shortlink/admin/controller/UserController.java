@@ -7,6 +7,7 @@ package com.pumpkins.shortlink.admin.controller;
  * @Copyright   : ...
  */
 
+import com.pumpkins.shortlink.admin.common.result.Result;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 import com.pumpkins.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,13 @@ public class UserController {
      * @return
      */
     @GetMapping("/api/short-link/v1/user/{username}")
-    public UserRespDTO getUserByUserName(@PathVariable("username") String username) {
-        return userService.getUserByUserName(username);
+    public Result<UserRespDTO> getUserByUserName(@PathVariable("username") String username) {
+        UserRespDTO result = userService.getUserByUserName(username);
+        if (null == result) {
+            return new Result<UserRespDTO>().setCode("-1").setMessage("用户查询为空");
+        } else {
+            return new Result<UserRespDTO>().setCode("-1").setData(result);
+        }
     }
 
 }
