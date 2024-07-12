@@ -75,6 +75,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
      */
     @Override
     public void register(UserRegisterReqDTO requestParam) {
+        // TODO 校验
+
         if (hasUserName(requestParam.getUsername())) {
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
