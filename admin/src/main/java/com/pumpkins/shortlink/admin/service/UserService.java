@@ -8,6 +8,7 @@ package com.pumpkins.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.admin.dao.entity.UserDO;
+import com.pumpkins.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 
 public interface UserService extends IService<UserDO> {
@@ -24,4 +25,10 @@ public interface UserService extends IService<UserDO> {
      * @return
      */
     Boolean hasUserName(String username);
+
+    /**
+     * 用户注册
+     * @param requestParam 用户注册参数对象
+     */
+    void register(UserRegisterReqDTO requestParam);
 }
