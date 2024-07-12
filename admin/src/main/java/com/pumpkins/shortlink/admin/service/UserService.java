@@ -9,11 +9,13 @@ package com.pumpkins.shortlink.admin.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.admin.dao.entity.UserDO;
 import com.pumpkins.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.pumpkins.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 
 public interface UserService extends IService<UserDO> {
     /**
      * 根据用户名返回用户信息
+     *
      * @param username 用户名
      * @return 用户返回实体
      */
@@ -21,6 +23,7 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 查询用户名是否存在
+     *
      * @param username
      * @return
      */
@@ -28,7 +31,14 @@ public interface UserService extends IService<UserDO> {
 
     /**
      * 用户注册
+     *
      * @param requestParam 用户注册参数对象
      */
     void register(UserRegisterReqDTO requestParam);
+
+    /**
+     * 用户更新
+     * @param requestParam
+     */
+    void update(UserUpdateReqDTO requestParam);
 }

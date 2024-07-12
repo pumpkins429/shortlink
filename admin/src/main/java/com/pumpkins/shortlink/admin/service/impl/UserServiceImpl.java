@@ -2,6 +2,7 @@ package com.pumpkins.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pumpkins.shortlink.admin.common.constant.RedisCacheConstants;
@@ -10,6 +11,7 @@ import com.pumpkins.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.pumpkins.shortlink.admin.dao.entity.UserDO;
 import com.pumpkins.shortlink.admin.dao.mapper.UserMapper;
 import com.pumpkins.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.pumpkins.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 import com.pumpkins.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
      */
     @Override
     public void register(UserRegisterReqDTO requestParam) {
-        // TODO 校验
+        // TODO 校验 以及密码加密保存
 
         if (hasUserName(requestParam.getUsername())) {
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
@@ -98,5 +100,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * 用户更新
+     *
+     * @param requestParam
+     */
+    @Override
+    public void update(UserUpdateReqDTO requestParam) {
+        // TODO 验证用户名与登录用户名是否相同 后续依赖网关实现
+        LambdaUpdateWrapper<UserDO> wrapper = Wrappers.lambdaUpdate(UserDO.class)
+                .eq(UserDO::getUsername, requestParam.getUsername());
+        baseMapper.update(BeanUtil.toBean(requestParam, UserDO.class), wrapper);
     }
 }
