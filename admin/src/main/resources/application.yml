@@ -13,3 +13,8 @@ spring:
       idle-timeout: 300000
       maximum-pool-size: 5
       minimum-idle: 5
+  data:
+    redis:
+      host: 117.72.41.10
+      port: 6379
+      password: pumpkins
