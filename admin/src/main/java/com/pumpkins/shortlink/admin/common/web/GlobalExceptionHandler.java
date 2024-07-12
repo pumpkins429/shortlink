@@ -9,6 +9,7 @@ import com.pumpkins.shortlink.admin.common.convention.result.Results;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -47,7 +48,7 @@ public class GlobalExceptionHandler {
      * 拦截应用内抛出的异常
      */
     @ExceptionHandler(value = {AbstractException.class})
-    public Result abstractException(HttpServletRequest request, AbstractException ex) {
+    public Result abstractExceptionHandler(HttpServletRequest request, AbstractException ex) {
         if (ex.getCause() != null) {
             log.error("[{}] {} [ex] {}", request.getMethod(), request.getRequestURL().toString(), ex.toString(), ex.getCause());
             return Results.failure(ex);
@@ -63,6 +64,20 @@ public class GlobalExceptionHandler {
     public Result defaultErrorHandler(HttpServletRequest request, Throwable throwable) {
         log.error("[{}] {} ", request.getMethod(), getUrl(request), throwable);
         return Results.failure();
+    }
+
+    /* 数据库异常 */
+
+    /**
+     * 唯一索引重复
+     * @param request
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(value = DuplicateKeyException.class)
+    public Result DuplicateKeyExceptionHandler(HttpServletRequest request, DuplicateKeyException ex) {
+        log.error("[{}] {} ", request.getMethod(), getUrl(request), ex);
+        return Results.failure(BaseErrorCode.DATABASE_DUPLICATE_KEY_ERROR.code(), BaseErrorCode.DATABASE_DUPLICATE_KEY_ERROR.message());
     }
 
     private String getUrl(HttpServletRequest request) {

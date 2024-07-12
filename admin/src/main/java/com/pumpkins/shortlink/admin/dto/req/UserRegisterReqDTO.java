@@ -5,15 +5,11 @@ import lombok.Data;
 /*
  * @author      : pumpkins
  * @date        : 2024/7/11 15:16
- * @description : 用户查询参数对象
+ * @description : 用户注册参数对象
  * @Copyright   : ...
  */
 @Data
-public class UserReqDTO {
-    /**
-     * id
-     */
-    private Long id;
+public class UserRegisterReqDTO {
 
     /**
      * 用户名
@@ -23,7 +19,7 @@ public class UserReqDTO {
     /**
      * 密码
      */
-    // private String password;
+    private String password;
 
     /**
      * 真实姓名
