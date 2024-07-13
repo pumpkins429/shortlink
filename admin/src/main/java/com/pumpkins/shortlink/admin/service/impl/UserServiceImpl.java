@@ -1,6 +1,8 @@
 package com.pumpkins.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.UUID;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -10,8 +12,10 @@ import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.pumpkins.shortlink.admin.dao.entity.UserDO;
 import com.pumpkins.shortlink.admin.dao.mapper.UserMapper;
+import com.pumpkins.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.UserUpdateReqDTO;
+import com.pumpkins.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 import com.pumpkins.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 /*
  * @author      : pumpkins
@@ -33,8 +40,8 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements UserService {
 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
-
     private final RedissonClient redissonClient;
+    private final StringRedisTemplate stringRedisTemplate;
 
     /**
      * 更具用户名返回用户信息
@@ -114,4 +121,62 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                 .eq(UserDO::getUsername, requestParam.getUsername());
         baseMapper.update(BeanUtil.toBean(requestParam, UserDO.class), wrapper);
     }
+
+    /**
+     * 用户登录
+     *
+     * @param requestParam
+     * @return
+     */
+    @Override
+    public UserLoginRespDTO login(UserLoginReqDTO requestParam) {
+        // TODO 校验用户信息
+        if (!hasUserName(requestParam.getUsername())) {
+            throw new ClientException("用户不存在");
+        }
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(RedisCacheConstants.USER_LOGIN_TOKEN + requestParam.getUsername()))) {
+            throw new ClientException("用户已登录");
+        }
+
+        // TODO 防刷
+        LambdaQueryWrapper<UserDO> wrapper = Wrappers.lambdaQuery(UserDO.class)
+                .eq(UserDO::getUsername, requestParam.getUsername())
+                .eq(UserDO::getPassword, requestParam.getPassword());
+        UserDO userDO = baseMapper.selectOne(wrapper);
+        if (null == userDO) {
+            throw new ClientException("请输入正确的用户名或密码");
+        }
+
+        String token = UUID.randomUUID().toString();
+        stringRedisTemplate.opsForHash().put(RedisCacheConstants.USER_LOGIN_TOKEN + requestParam.getUsername(), token, JSON.toJSONString(userDO));
+        stringRedisTemplate.expire(RedisCacheConstants.USER_LOGIN_TOKEN + requestParam.getUsername(), 30, TimeUnit.MINUTES);
+        return new UserLoginRespDTO(token);
+    }
+
+    /**
+     * 检查用户是否登录
+     *
+     * @param username
+     * @return true表示用户已登录
+     */
+    @Override
+    public Boolean checkLogin(String username, String token) {
+        return stringRedisTemplate.opsForHash().get(RedisCacheConstants.USER_LOGIN_TOKEN + username, token) != null;
+    }
+
+    /**
+     * 用户退出登录
+     *
+     * @param username
+     */
+    @Override
+    public void logout(String username, String token) {
+        if (checkLogin(username, token)) {
+            stringRedisTemplate.delete(RedisCacheConstants.USER_LOGIN_TOKEN + username);
+            return;
+        }
+        throw new ClientException("用户不存在或未登录");
+    }
+
+
 }

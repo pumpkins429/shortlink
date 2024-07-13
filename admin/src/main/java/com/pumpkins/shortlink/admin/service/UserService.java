@@ -8,8 +8,10 @@ package com.pumpkins.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.admin.dao.entity.UserDO;
+import com.pumpkins.shortlink.admin.dto.req.UserLoginReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.UserUpdateReqDTO;
+import com.pumpkins.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
 
 public interface UserService extends IService<UserDO> {
@@ -41,4 +43,25 @@ public interface UserService extends IService<UserDO> {
      * @param requestParam
      */
     void update(UserUpdateReqDTO requestParam);
+
+    /**
+     * 用户登录
+     * @param requestParam
+     * @return
+     */
+     UserLoginRespDTO login(UserLoginReqDTO requestParam);
+
+    /**
+     * 检查用户是否登录
+     * @param username
+     * @param token
+     * @return
+     */
+     Boolean checkLogin(String username, String token);
+
+    /**
+     * 用户退出登录
+     * @param username
+     */
+     void logout(String username, String token);
 }
