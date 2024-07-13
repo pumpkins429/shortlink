@@ -3,7 +3,7 @@ package com.pumpkins.shortlink.admin.controller;
 /*
  * @author      : pumpkins
  * @date        : 2024/7/8 11:12
- * @description : 用户管理控制层
+ * @description : 后管用户管理控制层
  * @Copyright   : ...
  */
 
