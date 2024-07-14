@@ -9,6 +9,7 @@ import com.pumpkins.shortlink.admin.common.biz.user.UserContext;
 import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.admin.dao.entity.GroupDO;
 import com.pumpkins.shortlink.admin.dao.mapper.GroupMapper;
+import com.pumpkins.shortlink.admin.dto.req.GroupSortReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.GroupUpdateReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.GroupRespDTO;
 import com.pumpkins.shortlink.admin.service.GroupService;
@@ -98,6 +99,26 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         GroupDO groupDO = new GroupDO();
         groupDO.setDelFlag(1);
         baseMapper.update(groupDO, wrapper);
+    }
+
+    /**
+     * 用户分组排序
+     *
+     * @param requestParam 分组排序请求参数
+     * @return
+     */
+    @Override
+    public void sortGroup(List<GroupSortReqDTO> requestParam) {
+        requestParam.forEach(group -> {
+            GroupDO groupDO = GroupDO.builder()
+                    .sortOrder(group.getSortOrder())
+                    .build();
+            LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
+                    .eq(GroupDO::getGid, group.getGid())
+                    .eq(GroupDO::getUsername, UserContext.getUsername())
+                    .eq(GroupDO::getDelFlag, 0);
+            baseMapper.update(groupDO, wrapper);
+        });
     }
 
     /**

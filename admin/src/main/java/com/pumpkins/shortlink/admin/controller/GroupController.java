@@ -3,6 +3,7 @@ package com.pumpkins.shortlink.admin.controller;
 import com.pumpkins.shortlink.admin.common.convention.result.Result;
 import com.pumpkins.shortlink.admin.common.convention.result.Results;
 import com.pumpkins.shortlink.admin.dto.req.GroupSaveReqDTO;
+import com.pumpkins.shortlink.admin.dto.req.GroupSortReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.GroupUpdateReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.GroupRespDTO;
 import com.pumpkins.shortlink.admin.service.GroupService;
@@ -62,6 +63,17 @@ public class GroupController {
     @DeleteMapping("/api/short-link/v1/group")
     public Result<Void> deleteGroup(@RequestParam String gid) {
         groupService.remove(gid);
+        return Results.success();
+    }
+
+    /**
+     * 用户分组排序
+     * @param requestParam 分组排序请求参数
+     * @return
+     */
+    @PostMapping("/api/short-link/v1/group/sort")
+    public Result<Void> sortGroup(@RequestBody List<GroupSortReqDTO> requestParam) {
+        groupService.sortGroup(requestParam);
         return Results.success();
     }
 
