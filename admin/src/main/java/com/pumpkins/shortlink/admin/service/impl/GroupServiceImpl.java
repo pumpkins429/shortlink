@@ -59,7 +59,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getDelFlag, 0)
                 // TODO 上下文获取用户名
                 .isNull(GroupDO::getUsername)
-                .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
+                .orderByDesc(List.of(GroupDO::getSortOrder, GroupDO::getUpdateTime));
         List<GroupDO> groupList = baseMapper.selectList(wrapper);
         return BeanUtil.copyToList(groupList, GroupRespDTO.class);
     }
