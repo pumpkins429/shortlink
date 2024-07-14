@@ -82,6 +82,25 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     }
 
     /**
+     * 删除分组 (软删除）
+     *
+     * @param gid 分组标识
+     */
+    @Override
+    public void remove(String gid) {
+        if (!hasGid(gid)) {
+            throw new ClientException("分组信息错误");
+        }
+        LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getGid, gid)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getDelFlag, 0);
+        GroupDO groupDO = new GroupDO();
+        groupDO.setDelFlag(1);
+        baseMapper.update(groupDO, wrapper);
+    }
+
+    /**
      * 查询是否存在gid
      * @param gid
      * @return
