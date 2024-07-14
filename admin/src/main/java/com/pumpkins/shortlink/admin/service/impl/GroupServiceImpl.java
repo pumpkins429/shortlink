@@ -15,6 +15,9 @@ import com.pumpkins.shortlink.admin.dto.resp.GroupRespDTO;
 import com.pumpkins.shortlink.admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +32,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
+
+    private final SqlSessionFactory sqlSessionFactory;
+
     /**
      * 新增分组
      *
@@ -38,7 +44,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     public void save(String groupName) {
         // TODO 增加权限验证
         String gid;
-        do{
+        do {
             gid = RandomUtil.randomString(6);
         } while (hasGid(gid));
         GroupDO groupDO = GroupDO.builder()
@@ -73,7 +79,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
      */
     @Override
     public void update(GroupUpdateReqDTO requestParam) {
-        if(!hasGid(requestParam.getGid())) {
+        if (!hasGid(requestParam.getGid())) {
             throw new ClientException("分组信息错误");
         }
         LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
@@ -109,6 +115,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
      */
     @Override
     public void sortGroup(List<GroupSortReqDTO> requestParam) {
+        /* long before = System.currentTimeMillis();
         requestParam.forEach(group -> {
             GroupDO groupDO = GroupDO.builder()
                     .sortOrder(group.getSortOrder())
@@ -119,10 +126,33 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                     .eq(GroupDO::getDelFlag, 0);
             baseMapper.update(groupDO, wrapper);
         });
+        System.out.println(System.currentTimeMillis() - before); */
+        // long before = System.currentTimeMillis();
+        // TODO 写法优化
+        List<GroupDO> groupList = requestParam.stream()
+                .map(group -> GroupDO.builder()
+                        .gid(group.getGid())
+                        .sortOrder(group.getSortOrder())
+                        .build())
+                .toList();
+
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            GroupMapper groupMapper = sqlSession.getMapper(GroupMapper.class);
+            groupList.forEach(groupDO -> {
+                LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
+                        .eq(GroupDO::getGid, groupDO.getGid())
+                        .eq(GroupDO::getUsername, UserContext.getUsername())
+                        .eq(GroupDO::getDelFlag, 0);
+                groupMapper.update(groupDO, wrapper);
+            });
+            sqlSession.flushStatements();
+            // System.out.println(System.currentTimeMillis() - before);
+        }
     }
 
     /**
      * 查询是否存在gid
+     *
      * @param gid
      * @return
      */
