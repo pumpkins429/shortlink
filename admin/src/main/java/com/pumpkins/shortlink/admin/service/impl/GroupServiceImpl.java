@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pumpkins.shortlink.admin.common.biz.user.UserContext;
+import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.admin.dao.entity.GroupDO;
 import com.pumpkins.shortlink.admin.dao.mapper.GroupMapper;
+import com.pumpkins.shortlink.admin.dto.req.GroupUpdateReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.GroupRespDTO;
 import com.pumpkins.shortlink.admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +63,22 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .orderByDesc(List.of(GroupDO::getSortOrder, GroupDO::getUpdateTime));
         List<GroupDO> groupList = baseMapper.selectList(wrapper);
         return BeanUtil.copyToList(groupList, GroupRespDTO.class);
+    }
+
+    /**
+     * 更新用户分组
+     *
+     * @param requestParam 更新用户分组请求参数
+     */
+    @Override
+    public void update(GroupUpdateReqDTO requestParam) {
+        if(!hasGid(requestParam.getGid())) {
+            throw new ClientException("分组信息错误");
+        }
+        LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid, requestParam.getGid());
+        baseMapper.update(BeanUtil.toBean(requestParam, GroupDO.class), wrapper);
     }
 
     /**

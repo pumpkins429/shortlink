@@ -9,6 +9,9 @@ import java.util.Optional;
  */
 public final class UserContext {
 
+    /**
+     * 可以跨线程共享信息？
+     */
     private static final ThreadLocal<UserInfoDTO> USER_THREAD_LOCAL = new TransmittableThreadLocal<>();
 
     /**
