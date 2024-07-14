@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pumpkins.shortlink.admin.common.biz.user.UserContext;
+import com.pumpkins.shortlink.admin.common.biz.user.UserInfoDTO;
 import com.pumpkins.shortlink.admin.common.constant.RedisCacheConstants;
 import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.admin.common.enums.UserErrorCodeEnum;
@@ -149,7 +151,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
         String token = UUID.randomUUID().toString();
         stringRedisTemplate.opsForHash().put(RedisCacheConstants.USER_LOGIN_TOKEN + requestParam.getUsername(), token, JSON.toJSONString(userDO));
-        stringRedisTemplate.expire(RedisCacheConstants.USER_LOGIN_TOKEN + requestParam.getUsername(), 30, TimeUnit.MINUTES);
+        stringRedisTemplate.expire(RedisCacheConstants.USER_LOGIN_TOKEN + requestParam.getUsername(), 30, TimeUnit.DAYS);
+
+        // 保存用户上下文
+        UserInfoDTO userInfoDTO = UserInfoDTO.builder()
+                .userId(userDO.getId().toString())
+                .username(userDO.getUsername())
+                .realName(userDO.getRealName())
+                .token(token).build();
+        UserContext.setUser(userInfoDTO);
+
         return new UserLoginRespDTO(token);
     }
 

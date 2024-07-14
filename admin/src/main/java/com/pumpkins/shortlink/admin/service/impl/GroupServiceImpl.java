@@ -5,6 +5,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pumpkins.shortlink.admin.common.biz.user.UserContext;
 import com.pumpkins.shortlink.admin.dao.entity.GroupDO;
 import com.pumpkins.shortlink.admin.dao.mapper.GroupMapper;
 import com.pumpkins.shortlink.admin.dto.resp.GroupRespDTO;
@@ -40,8 +41,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         GroupDO groupDO = GroupDO.builder()
                 .gid(gid)
                 .name(groupName)
-                // TODO 上下文获取用户名
-                .username(null)
+                .username(UserContext.getUsername())
                 .sortOrder(0)
                 .build();
         // 数据库给gid和username加了复合索引
@@ -57,8 +57,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     public List<GroupRespDTO> listGroup() {
         LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getDelFlag, 0)
-                // TODO 上下文获取用户名
-                .isNull(GroupDO::getUsername)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
                 .orderByDesc(List.of(GroupDO::getSortOrder, GroupDO::getUpdateTime));
         List<GroupDO> groupList = baseMapper.selectList(wrapper);
         return BeanUtil.copyToList(groupList, GroupRespDTO.class);

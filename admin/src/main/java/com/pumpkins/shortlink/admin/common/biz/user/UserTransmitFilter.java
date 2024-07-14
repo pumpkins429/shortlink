@@ -1,0 +1,62 @@
+package com.pumpkins.shortlink.admin.common.biz.user;
+
+import com.alibaba.fastjson2.JSON;
+import com.google.common.collect.Lists;
+import com.pumpkins.shortlink.admin.common.constant.RedisCacheConstants;
+import com.pumpkins.shortlink.admin.common.constant.UserConstant;
+import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.List;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+/**
+ * 用户信息传输过滤器
+ **/
+@RequiredArgsConstructor
+public class UserTransmitFilter implements Filter {
+
+    private final StringRedisTemplate stringRedisTemplate;
+
+    private static final List<String> IGNORE_URI = Lists.newArrayList(
+            "/api/short-link/v1/user/login",
+            "/api/short-Link/v1/user/has-username");
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        String requestURI = httpServletRequest.getRequestURI();
+        if (!IGNORE_URI.contains(requestURI)) {
+            String userName = httpServletRequest.getHeader(UserConstant.USER_NAME_KEY);
+            if (StringUtils.hasText(userName)) {
+                userName = URLDecoder.decode(userName, UTF_8);
+            }
+            String token = httpServletRequest.getHeader(UserConstant.USER_TOKEN_KEY);
+            if (null == userName || null == token) {
+                // TODO 过滤器的异常无法被全局异常拦截器捕获
+                throw new ClientException("请求用户名或token错误");
+            }
+            String userInfoJsonStr = (String) stringRedisTemplate.opsForHash().get(RedisCacheConstants.USER_LOGIN_TOKEN + userName, token);
+            if (null != userInfoJsonStr) {
+                UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr, UserInfoDTO.class);
+                UserContext.setUser(userInfoDTO);
+            } else {
+                throw new ClientException("请求用户名或token错误！");
+            }
+        }
+
+        try {
+            filterChain.doFilter(servletRequest, servletResponse);
+        } finally {
+            // 释放，防止内存泄漏
+            UserContext.removeUser();
+        }
+    }
+}
