@@ -7,6 +7,9 @@ package com.pumpkins.shortlink.admin.service;/*
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.admin.dao.entity.GroupDO;
+import com.pumpkins.shortlink.admin.dto.resp.GroupRespDTO;
+
+import java.util.List;
 
 public interface GroupService extends IService<GroupDO> {
 
@@ -15,4 +18,10 @@ public interface GroupService extends IService<GroupDO> {
      * @param groupName
      */
     void save(String groupName);
+
+    /**
+     * 查询当前用户的所有分组
+     * @return
+     */
+    List<GroupRespDTO> listGroup();
 }
