@@ -29,7 +29,7 @@ public class GroupController {
      * @param requestParam
      * @return
      */
-    @PostMapping("/api/short-link/v1/group")
+    @PostMapping("/api/short-link/admin/v1/group")
     public Result<Void> saveGroup(@RequestBody GroupSaveReqDTO requestParam) {
         groupService.save(requestParam.getGroupName());
         return Results.success();
@@ -39,7 +39,7 @@ public class GroupController {
      * 查询当前用户的所有分组
      * @return
      */
-    @GetMapping("/api/short-link/v1/group")
+    @GetMapping("/api/short-link/admin/v1/group")
     public Result<List<GroupRespDTO>> listGroup() {
         return Results.success(groupService.listGroup());
     }
@@ -49,7 +49,7 @@ public class GroupController {
      * @param requestParam
      * @return
      */
-    @PutMapping("/api/short-link/v1/group")
+    @PutMapping("/api/short-link/admin/v1/group")
     public Result<Void> updateGroup(@RequestBody GroupUpdateReqDTO requestParam) {
         groupService.update(requestParam);
         return Results.success();
@@ -60,7 +60,7 @@ public class GroupController {
      * @param gid 分组标识
      * @return
      */
-    @DeleteMapping("/api/short-link/v1/group")
+    @DeleteMapping("/api/short-link/admin/v1/group")
     public Result<Void> deleteGroup(@RequestParam String gid) {
         groupService.remove(gid);
         return Results.success();
@@ -71,7 +71,7 @@ public class GroupController {
      * @param requestParam 分组排序请求参数
      * @return
      */
-    @PostMapping("/api/short-link/v1/group/sort")
+    @PostMapping("/api/short-link/admin/v1/group/sort")
     public Result<Void> sortGroup(@RequestBody List<GroupSortReqDTO> requestParam) {
         groupService.sortGroup(requestParam);
         return Results.success();
