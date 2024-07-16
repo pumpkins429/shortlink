@@ -1,10 +1,16 @@
 package com.pumpkins.shortlink.project.toolkit;
+
 import cn.hutool.core.lang.hash.MurmurHash;
 
 /**
  * HASH 工具类
  */
 public class HashUtil {
+
+    /**
+     * 最大值
+     */
+    private static final long MAX_VALUE = (long) (Math.pow(62, 6) - 1);
 
     private static final char[] CHARS = new char[]{
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -16,6 +22,7 @@ public class HashUtil {
 
     /**
      * 将十进制转为62进制
+     *
      * @param num
      * @return
      */
@@ -29,6 +36,11 @@ public class HashUtil {
         return sb.reverse().toString();
     }
 
+    /**
+     * TODO 存在一定的问题，实际生成的最大值约42亿，小于MAX_VALUE
+     * @param str
+     * @return
+     */
     public static String hashToBase62(String str) {
         int i = MurmurHash.hash32(str);
         long num = i < 0 ? Integer.MAX_VALUE - (long) i : i;

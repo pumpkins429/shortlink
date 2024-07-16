@@ -157,6 +157,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
      * @return
      */
     private boolean hasGid(String gid) {
+        // TODO 待优化
         LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getGid, gid);
         GroupDO groupDO = baseMapper.selectOne(wrapper);
