@@ -7,6 +7,15 @@ package com.pumpkins.shortlink.project.service;/*
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
+import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
+import com.pumpkins.shortlink.project.dto.resp.LinkCreateRespDTO;
 
 public interface LinkService extends IService<LinkDO> {
+
+    /**
+     * 创建短链接
+     * @param requestParam
+     * @return
+     */
+    LinkCreateRespDTO createLink(LinkCreateReqDTO requestParam);
 }
