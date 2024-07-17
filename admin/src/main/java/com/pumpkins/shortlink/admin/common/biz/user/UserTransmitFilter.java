@@ -1,5 +1,6 @@
 package com.pumpkins.shortlink.admin.common.biz.user;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.Lists;
 import com.pumpkins.shortlink.admin.common.constant.RedisCacheConstants;
@@ -31,28 +32,32 @@ public class UserTransmitFilter implements Filter {
 
     private static final List<String> IGNORE_URI = Lists.newArrayList(
             "/api/short-link/admin/v1/user/login",
-            "/api/short-Link/admin/v1/user/has-username");
+            "/api/short-link/admin/v1/has-username");
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String method = httpServletRequest.getMethod();
         String requestURI = httpServletRequest.getRequestURI();
-        if (!IGNORE_URI.contains(requestURI) && !("/api/short-link/admin/v1/user".equals(requestURI) && "POST".equalsIgnoreCase(method))) {
-            String userName = httpServletRequest.getHeader(UserConstant.USER_NAME_KEY);
-            if (StringUtils.hasText(userName)) {
-                userName = URLDecoder.decode(userName, UTF_8);
-            }
-            String token = httpServletRequest.getHeader(UserConstant.USER_TOKEN_KEY);
-            if (null == userName || null == token) {
-                returnJson(servletResponse, JSON.toJSONString(Results.failure(new ClientException("请求用户名或token错误"))));
-            }
-            String userInfoJsonStr = (String) stringRedisTemplate.opsForHash().get(RedisCacheConstants.USER_LOGIN_TOKEN + userName, token);
-            if (null != userInfoJsonStr) {
-                UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr, UserInfoDTO.class);
-                UserContext.setUser(userInfoDTO);
-            } else {
-                returnJson(servletResponse, JSON.toJSONString(Results.failure(new ClientException("请求用户名或token错误"))));
+        if (!IGNORE_URI.contains(requestURI)) {
+            if (!("/api/short-link/admin/v1/user".equals(requestURI) && "POST".equalsIgnoreCase(method))) {
+                String userName = httpServletRequest.getHeader(UserConstant.USER_NAME_KEY);
+                if (StringUtils.hasText(userName)) {
+                    userName = URLDecoder.decode(userName, UTF_8);
+                }
+                String token = httpServletRequest.getHeader(UserConstant.USER_TOKEN_KEY);
+                if (!StrUtil.isAllNotBlank(userName, token)) {
+                    returnJson(servletResponse, JSON.toJSONString(Results.failure(new ClientException("请求用户名或token错误"))));
+                    return;
+                }
+                String userInfoJsonStr = (String) stringRedisTemplate.opsForHash().get(RedisCacheConstants.USER_LOGIN_TOKEN + userName, token);
+                if (null != userInfoJsonStr) {
+                    UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr, UserInfoDTO.class);
+                    UserContext.setUser(userInfoDTO);
+                } else {
+                    returnJson(servletResponse, JSON.toJSONString(Results.failure(new ClientException("请求用户名或token错误"))));
+                    return;
+                }
             }
         }
         try {
