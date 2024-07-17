@@ -87,7 +87,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public void register(UserRegisterReqDTO requestParam) {
         // TODO 校验 以及密码加密保存
-
         if (hasUserName(requestParam.getUsername())) {
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
@@ -96,10 +95,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         RLock lock = redissonClient.getLock(key);
         try {
             if (lock.tryLock()) {
-                int result = baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
-                if (result < 1) {
-                    throw new ClientException(UserErrorCodeEnum.USER_SAVE_FAIL);
-                }
+               baseMapper.insert(BeanUtil.toBean(requestParam, UserDO.class));
                 // 同步到布隆过滤器
                 userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
                 log.info("新建用户成功->{}", requestParam.getUsername());

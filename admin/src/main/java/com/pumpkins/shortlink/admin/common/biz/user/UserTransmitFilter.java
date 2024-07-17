@@ -5,13 +5,16 @@ import com.google.common.collect.Lists;
 import com.pumpkins.shortlink.admin.common.constant.RedisCacheConstants;
 import com.pumpkins.shortlink.admin.common.constant.UserConstant;
 import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
+import com.pumpkins.shortlink.admin.common.convention.result.Results;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.List;
 
@@ -20,38 +23,38 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * 用户信息传输过滤器
  **/
+@Slf4j
 @RequiredArgsConstructor
 public class UserTransmitFilter implements Filter {
 
     private final StringRedisTemplate stringRedisTemplate;
 
     private static final List<String> IGNORE_URI = Lists.newArrayList(
-            "/api/short-link/v1/user/login",
-            "/api/short-Link/v1/user/has-username");
+            "/api/short-link/admin/v1/user/login",
+            "/api/short-Link/admin/v1/user/has-username");
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        String method = httpServletRequest.getMethod();
         String requestURI = httpServletRequest.getRequestURI();
-        if (!IGNORE_URI.contains(requestURI)) {
+        if (!IGNORE_URI.contains(requestURI) && !("/api/short-link/admin/v1/user".equals(requestURI) && "POST".equalsIgnoreCase(method))) {
             String userName = httpServletRequest.getHeader(UserConstant.USER_NAME_KEY);
             if (StringUtils.hasText(userName)) {
                 userName = URLDecoder.decode(userName, UTF_8);
             }
             String token = httpServletRequest.getHeader(UserConstant.USER_TOKEN_KEY);
             if (null == userName || null == token) {
-                // TODO 过滤器的异常无法被全局异常拦截器捕获
-                throw new ClientException("请求用户名或token错误");
+                returnJson(servletResponse, JSON.toJSONString(Results.failure(new ClientException("请求用户名或token错误"))));
             }
             String userInfoJsonStr = (String) stringRedisTemplate.opsForHash().get(RedisCacheConstants.USER_LOGIN_TOKEN + userName, token);
             if (null != userInfoJsonStr) {
                 UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr, UserInfoDTO.class);
                 UserContext.setUser(userInfoDTO);
             } else {
-                throw new ClientException("请求用户名或token错误！");
+                returnJson(servletResponse, JSON.toJSONString(Results.failure(new ClientException("请求用户名或token错误"))));
             }
         }
-
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
@@ -59,4 +62,27 @@ public class UserTransmitFilter implements Filter {
             UserContext.removeUser();
         }
     }
+
+    /**
+     * 全局异常处理器无法拦截过滤器抛出的异常，这里手动在response写入异常信息
+     * @param response
+     * @param json
+     */
+    private void returnJson(ServletResponse response, String json) {
+        PrintWriter writer = null;
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json; charset=utf-8");
+        try {
+            writer = response.getWriter();
+            writer.print(json);
+
+        } catch (IOException e) {
+            log.error("response error", e);
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }
+
 }
