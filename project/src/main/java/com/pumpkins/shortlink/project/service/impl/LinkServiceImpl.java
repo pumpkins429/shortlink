@@ -41,7 +41,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
      * @return
      */
     @Override
-    public LinkCreateRespDTO createLink(LinkCreateReqDTO requestParam) {
+    public LinkCreateRespDTO saveLink(LinkCreateReqDTO requestParam) {
         // TODO 校验网址格式等
         String fullShortLink = generateShortLink(requestParam);
         LinkDO linkDO = BeanUtil.toBean(requestParam, LinkDO.class);
@@ -65,7 +65,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
     /**
      * 分页查询短链
-     *
+     * TODO 应该增加校验，验证用户身份，防止用户篡改请求参数中的gid直接查到其他用户的分组下的链接 link表应该也可以加上username字段，查的时候需要这两个条件就行。
      * @param requestParam
      * @return
      */

@@ -32,8 +32,8 @@ public class LinkController {
      * @return
      */
     @PostMapping("/api/short-link/v1/link")
-    public Result<LinkCreateRespDTO> createLink(@RequestBody LinkCreateReqDTO requestParam) {
-        return Results.success(linkService.createLink(requestParam));
+    public Result<LinkCreateRespDTO> saveLink(@RequestBody LinkCreateReqDTO requestParam) {
+        return Results.success(linkService.saveLink(requestParam));
     }
 
     /**

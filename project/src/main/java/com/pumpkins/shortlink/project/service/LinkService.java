@@ -20,7 +20,7 @@ public interface LinkService extends IService<LinkDO> {
      * @param requestParam
      * @return
      */
-    LinkCreateRespDTO createLink(LinkCreateReqDTO requestParam);
+    LinkCreateRespDTO saveLink(LinkCreateReqDTO requestParam);
 
 
     /**
