@@ -17,4 +17,10 @@ public class LinkPageReqDTO extends Page<LinkDO> {
      */
     private String gid;
 
+    /**
+     * 短链所属用户名
+     */
+    private String username;
+
+
 }
