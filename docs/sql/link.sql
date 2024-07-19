@@ -155,6 +155,7 @@ CREATE TABLE `t_link` (
                           `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                           `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                           `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                          `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                           `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                           `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                           `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -175,6 +176,7 @@ CREATE TABLE `t_link_0` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -186,6 +188,7 @@ CREATE TABLE `t_link_0` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `t_link_1` (
                             `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -195,6 +198,7 @@ CREATE TABLE `t_link_1` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -206,6 +210,7 @@ CREATE TABLE `t_link_1` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `t_link_2` (
                             `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -215,6 +220,7 @@ CREATE TABLE `t_link_2` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -226,6 +232,7 @@ CREATE TABLE `t_link_2` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `t_link_3` (
                             `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -235,6 +242,7 @@ CREATE TABLE `t_link_3` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -246,6 +254,7 @@ CREATE TABLE `t_link_3` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `t_link_4` (
                             `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -255,6 +264,7 @@ CREATE TABLE `t_link_4` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -266,6 +276,7 @@ CREATE TABLE `t_link_4` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `t_link_5` (
                             `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -275,6 +286,7 @@ CREATE TABLE `t_link_5` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -286,6 +298,7 @@ CREATE TABLE `t_link_5` (
                             PRIMARY KEY (`id`),
                             UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `t_link_6` (
                             `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -295,6 +308,7 @@ CREATE TABLE `t_link_6` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
@@ -307,6 +321,7 @@ CREATE TABLE `t_link_6` (
                             UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
 CREATE TABLE `t_link_7` (
                             `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
                             `domain` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '域名',
@@ -315,6 +330,7 @@ CREATE TABLE `t_link_7` (
                             `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',
                             `click_num` int(11) DEFAULT 0 COMMENT '点击量',
                             `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+                            `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',
                             `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',
                             `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',
                             `valid_date_type` tinyint(1) DEFAULT NULL COMMENT '有效期类型 0：永久有效 1：用户自定义',
