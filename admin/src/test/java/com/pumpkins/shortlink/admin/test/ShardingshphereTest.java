@@ -17,6 +17,7 @@ public class ShardingshphereTest {
                 "                          `origin_url` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '原始链接',\n" +
                 "                          `click_num` int(11) DEFAULT 0 COMMENT '点击量',\n" +
                 "                          `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',\n" +
+                "                          `username` varchar(256) DEFAULT NULL COMMENT '短链所属的用户名',\n" +
                 "                          `favicon` varchar(1024) DEFAULT NULL COMMENT '原始链接图标',\n" +
                 "                          `enable_status` tinyint(1) DEFAULT NULL COMMENT '启用标识 0：未启用 1：已启用',\n" +
                 "                          `created_type` tinyint(1) DEFAULT NULL COMMENT '创建类型 0：控制台 1：接口',\n" +
@@ -28,7 +29,7 @@ public class ShardingshphereTest {
                 "                          `del_flag` tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',\n" +
                 "                          PRIMARY KEY (`id`),\n" +
                 "                          UNIQUE KEY `idx_unique_full_short_url` (`full_short_url`) USING BTREE\n" +
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;" +
                 "\n";
 
 
