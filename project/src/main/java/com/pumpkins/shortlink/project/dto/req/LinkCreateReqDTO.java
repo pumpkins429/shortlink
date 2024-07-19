@@ -37,6 +37,11 @@ public class LinkCreateReqDTO {
      */
     private String gid;
 
+    /**
+     * 原始链接图标
+     */
+    private String favicon;
+
 
     /**
      * 创建类型 0：控制台 1：接口

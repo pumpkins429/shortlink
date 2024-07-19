@@ -2,12 +2,17 @@ package com.pumpkins.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pumpkins.shortlink.project.common.convention.exception.ServiceException;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dao.mapper.LinkMapper;
 import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
 import com.pumpkins.shortlink.project.dto.resp.LinkCreateRespDTO;
+import com.pumpkins.shortlink.project.dto.resp.LinkPageRespDTO;
 import com.pumpkins.shortlink.project.service.LinkService;
 import com.pumpkins.shortlink.project.toolkit.HashUtil;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +61,22 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .fullShortUrl(linkDO.getFullShortUrl())
                 .originUrl(requestParam.getOriginUrl())
                 .build();
+    }
+
+    /**
+     * 分页查询短链
+     *
+     * @param requestParam
+     * @return
+     */
+    @Override
+    public IPage<LinkPageRespDTO> queryLinkPage(LinkPageReqDTO requestParam) {
+        LambdaQueryWrapper<LinkDO> wrapper = Wrappers.lambdaQuery(LinkDO.class)
+                .eq(LinkDO::getGid, requestParam.getGid())
+                // .eq(LinkDO::getEnableStatus, 1)
+                .orderByDesc(LinkDO::getCreateTime);
+        IPage<LinkDO> resultPage = baseMapper.selectPage(requestParam, wrapper);
+        return resultPage.convert(each -> BeanUtil.toBean(each, LinkPageRespDTO.class));
     }
 
     private String generateShortLink(LinkCreateReqDTO requestParam) {

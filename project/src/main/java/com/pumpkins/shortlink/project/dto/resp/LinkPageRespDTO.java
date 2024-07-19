@@ -1,25 +1,18 @@
-package com.pumpkins.shortlink.project.dao.entity;
+package com.pumpkins.shortlink.project.dto.resp;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.pumpkins.shortlink.project.common.database.BaseDO;
 import lombok.Data;
 
 import java.util.Date;
 
 /*
  * @author      : pumpkins
- * @date        : 2024/7/16 14:14
- * @description : 短链实体类
+ * @date        : 2024/7/19 17:25
+ * @description : 短链分页返回结果
  * @Copyright   : ...
  */
 @Data
-@TableName("t_link")
-public class LinkDO extends BaseDO {
-    /**
-     * id
-     */
-    private Long id;
+public class LinkPageRespDTO {
 
     /**
      * 域名

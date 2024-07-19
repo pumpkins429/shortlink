@@ -5,10 +5,13 @@ package com.pumpkins.shortlink.project.service;/*
  * @Copyright   : ...
  */
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
 import com.pumpkins.shortlink.project.dto.resp.LinkCreateRespDTO;
+import com.pumpkins.shortlink.project.dto.resp.LinkPageRespDTO;
 
 public interface LinkService extends IService<LinkDO> {
 
@@ -18,4 +21,12 @@ public interface LinkService extends IService<LinkDO> {
      * @return
      */
     LinkCreateRespDTO createLink(LinkCreateReqDTO requestParam);
+
+
+    /**
+     * 分页查询短链
+     * @param requestParam
+     * @return
+     */
+    IPage<LinkPageRespDTO> queryLinkPage(LinkPageReqDTO requestParam);
 }
