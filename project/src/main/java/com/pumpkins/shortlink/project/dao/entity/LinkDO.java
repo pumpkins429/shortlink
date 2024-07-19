@@ -3,7 +3,10 @@ package com.pumpkins.shortlink.project.dao.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.pumpkins.shortlink.project.common.database.BaseDO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -15,6 +18,9 @@ import java.util.Date;
  */
 @Data
 @TableName("t_link")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LinkDO extends BaseDO {
     /**
      * id
@@ -50,6 +56,11 @@ public class LinkDO extends BaseDO {
      * 分组标识
      */
     private String gid;
+
+    /**
+     * 短链所属用户名
+     */
+    private String username;
 
     /**
      * 原始链接图标
