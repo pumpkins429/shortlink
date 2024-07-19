@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pumpkins.shortlink.project.common.biz.user.UserContext;
 import com.pumpkins.shortlink.project.common.convention.exception.ServiceException;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dao.mapper.LinkMapper;
@@ -46,6 +47,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         String fullShortLink = generateShortLink(requestParam);
         LinkDO linkDO = BeanUtil.toBean(requestParam, LinkDO.class);
         linkDO.setEnableStatus(0);
+        linkDO.setUsername(UserContext.getUsername());
         linkDO.setShortUri(fullShortLink.substring(fullShortLink.lastIndexOf("/") + 1));
         linkDO.setFullShortUrl(fullShortLink);
         try {
@@ -74,6 +76,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         LambdaQueryWrapper<LinkDO> wrapper = Wrappers.lambdaQuery(LinkDO.class)
                 .eq(LinkDO::getGid, requestParam.getGid())
                 // .eq(LinkDO::getEnableStatus, 1)
+                .eq(LinkDO::getUsername, UserContext.getUsername())
                 .orderByDesc(LinkDO::getCreateTime);
         IPage<LinkDO> resultPage = baseMapper.selectPage(requestParam, wrapper);
         return resultPage.convert(each -> BeanUtil.toBean(each, LinkPageRespDTO.class));
