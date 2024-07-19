@@ -45,7 +45,7 @@ public class Result<T> implements Serializable {
     private String requestId;
 
     /**
-     * json序列化会自动生成success字段
+     * json序列化识别is开头的方法会自动生成对应字段（这里是success）
      * @return
      */
     // @JsonProperty("ok")
