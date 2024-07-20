@@ -51,7 +51,7 @@ public class LinkController {
      * @param gids
      * @return
      */
-    @GetMapping("/api/short-link/v1/link/count")
+    @GetMapping("/api/short-link/v1/group-link-count")
     public Result<List<LinkCountQueryRespDTO>> queryLinkCount(@RequestParam List<String> gids) {
         return Results.success(linkService.queryLinkCount(gids));
     }
