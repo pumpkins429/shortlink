@@ -51,6 +51,7 @@ public class UserTransmitFilter implements Filter {
             String userInfoJsonStr = (String) stringRedisTemplate.opsForHash().get(RedisCacheConstants.USER_LOGIN_TOKEN + userName, token);
             if (null != userInfoJsonStr) {
                 UserInfoDTO userInfoDTO = JSON.parseObject(userInfoJsonStr, UserInfoDTO.class);
+                userInfoDTO.setToken(token);
                 UserContext.setUser(userInfoDTO);
             } else {
                 returnJson(servletResponse, JSON.toJSONString(Results.failure(new ClientException("请求用户名或token错误"))));
