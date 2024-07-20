@@ -5,12 +5,12 @@ import com.pumpkins.shortlink.admin.common.convention.result.Result;
 import com.pumpkins.shortlink.admin.remote.LinkRemoteService;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkPageReqDTO;
+import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
 import com.pumpkins.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /*
  * @author      : pumpkins
@@ -42,6 +42,16 @@ public class LinkRemoteController {
     @GetMapping("/api/short-link/admin/v1/link/page")
     public Result<IPage<LinkPageRespDTO>> queryLinkPage(@RequestBody LinkPageReqDTO requestParam) throws Exception {
         return linkRemoteService.queryLinkPage(requestParam);
+    }
+
+    /**
+     * 查询对应分组的短链数量
+     * @param gids
+     * @return
+     */
+    @GetMapping("/api/short-link/v1/group-link-count")
+    public Result<List<LinkCountQueryRespDTO>> queryLinkCount(@RequestParam List<String> gids) {
+        return linkRemoteService.queryLinkCount(gids);
     }
 
 }

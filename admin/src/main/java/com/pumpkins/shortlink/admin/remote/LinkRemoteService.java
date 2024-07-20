@@ -4,9 +4,11 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.pumpkins.shortlink.admin.common.biz.user.UserContext;
+import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.admin.common.convention.result.Result;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkPageReqDTO;
+import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
 import com.pumpkins.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
 
@@ -16,6 +18,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.HashMap;
+import java.util.List;
 
 /*
  * @author      : pumpkins
@@ -78,6 +81,47 @@ public interface LinkRemoteService {
 
         // 发送请求并接收响应
         String resultJsonStr = CLIENT.send(request, BodyHandlers.ofString()).body();
+        return JSON.parseObject(resultJsonStr, new TypeReference<>() {
+        });
+    }
+
+    /**
+     * 查询对应分组的短链数量
+     * @param gids gid 集合
+     * @return
+     */
+    default Result<List<LinkCountQueryRespDTO>> queryLinkCount(List<String> gids){
+        String url = "http://127.0.0.1:8001/api/short-link/v1/group-link-count";
+
+        // 将 gids 转换为查询参数
+        StringBuilder urlWithParams = new StringBuilder(url);
+        urlWithParams.append("?");
+        for (String gid : gids) {
+            urlWithParams.append("gids=").append(gid).append("&");
+        }
+        // 去掉最后一个 '&'
+        urlWithParams.deleteCharAt(urlWithParams.length() - 1);
+
+        // 创建HttpRequest实例，设置请求方法、URL、头和请求体
+        HttpRequest request;
+        try{
+             request = HttpRequest.newBuilder()
+                    .uri(new URI(urlWithParams.toString()))
+                    .header("Content-Type", "application/json")
+                    .header("username", UserContext.getUsername())
+                    .header("token", UserContext.getToken())
+                    .GET()
+                    .build();
+        } catch (Exception e) {
+            throw new ClientException("请求异常");
+        }
+        // 发送请求并接收响应
+        String resultJsonStr;
+        try {
+            resultJsonStr = CLIENT.send(request, BodyHandlers.ofString()).body();
+        } catch (Exception e) {
+            throw new ClientException("请求异常");
+        }
         return JSON.parseObject(resultJsonStr, new TypeReference<>() {
         });
     }

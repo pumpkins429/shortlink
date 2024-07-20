@@ -7,11 +7,14 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pumpkins.shortlink.admin.common.biz.user.UserContext;
 import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
+import com.pumpkins.shortlink.admin.common.convention.result.Result;
 import com.pumpkins.shortlink.admin.dao.entity.GroupDO;
 import com.pumpkins.shortlink.admin.dao.mapper.GroupMapper;
 import com.pumpkins.shortlink.admin.dto.req.GroupSortReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.GroupUpdateReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.GroupRespDTO;
+import com.pumpkins.shortlink.admin.remote.LinkRemoteService;
+import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
 import com.pumpkins.shortlink.admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /*
  * @author      : pumpkins
@@ -34,6 +38,9 @@ import java.util.List;
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
 
     private final SqlSessionFactory sqlSessionFactory;
+
+    // TODO 后续重构为SpringCloud feign调用
+    private LinkRemoteService linkRemoteService = new LinkRemoteService() {};
 
     /**
      * 新增分组
@@ -69,7 +76,21 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getUsername, UserContext.getUsername())
                 .orderByDesc(List.of(GroupDO::getSortOrder, GroupDO::getUpdateTime));
         List<GroupDO> groupList = baseMapper.selectList(wrapper);
-        return BeanUtil.copyToList(groupList, GroupRespDTO.class);
+        List<GroupRespDTO> groupRespList = BeanUtil.copyToList(groupList, GroupRespDTO.class);
+        Result<List<LinkCountQueryRespDTO>> linkCountResult = linkRemoteService.queryLinkCount(
+                groupList.stream().map(GroupDO::getGid).toList()
+        );
+        // 由于后管只查分组表，中台查短链表，返回分组信息需要有分组下的短链数量，因此需要分别查两张表然后封装分组下的短链数量到响应参数中
+        groupRespList.forEach(each -> {
+            Optional<LinkCountQueryRespDTO> first = linkCountResult.getData()
+                    .stream()
+                    .filter(item -> item.getGid().equals(each.getGid()))
+                    .findFirst();
+            first.ifPresent(item -> {
+                each.setShortLinkCount(item.getShortLinkCount());
+            });
+        });
+        return groupRespList;
     }
 
     /**
