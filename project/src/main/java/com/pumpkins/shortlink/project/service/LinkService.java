@@ -10,8 +10,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
+import com.pumpkins.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import com.pumpkins.shortlink.project.dto.resp.LinkCreateRespDTO;
 import com.pumpkins.shortlink.project.dto.resp.LinkPageRespDTO;
+
+import java.util.List;
 
 public interface LinkService extends IService<LinkDO> {
 
@@ -29,4 +32,11 @@ public interface LinkService extends IService<LinkDO> {
      * @return
      */
     IPage<LinkPageRespDTO> queryLinkPage(LinkPageReqDTO requestParam);
+
+    /**
+     * 查询对应分组的短链数量
+     * @param gids
+     * @return
+     */
+    List<LinkCountQueryRespDTO> queryLinkCount(List<String> gids);
 }

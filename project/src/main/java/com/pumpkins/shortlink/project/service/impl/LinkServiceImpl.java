@@ -3,6 +3,7 @@ package com.pumpkins.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,6 +13,7 @@ import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dao.mapper.LinkMapper;
 import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
+import com.pumpkins.shortlink.project.dto.resp.LinkCountQueryRespDTO;
 import com.pumpkins.shortlink.project.dto.resp.LinkCreateRespDTO;
 import com.pumpkins.shortlink.project.dto.resp.LinkPageRespDTO;
 import com.pumpkins.shortlink.project.service.LinkService;
@@ -21,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /*
  * @author      : pumpkins
@@ -80,6 +85,29 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .orderByDesc(LinkDO::getCreateTime);
         IPage<LinkDO> resultPage = baseMapper.selectPage(requestParam, wrapper);
         return resultPage.convert(each -> BeanUtil.toBean(each, LinkPageRespDTO.class));
+    }
+
+    /**
+     * 查询对应分组的短链数量
+     *
+     * @param gids
+     * @return
+     */
+    @Override
+    public List<LinkCountQueryRespDTO> queryLinkCount(List<String> gids) {
+        // 使用Wrappers.query，基本类型的字段会自动加入where子句
+        /* QueryWrapper<LinkDO> wrapper = Wrappers.query(new LinkDO())
+                .select("gid as gid, count(*) as shortLinkCount")
+                .in("gid", gids)
+                .eq("enable_status", 0)
+                .groupBy("gid"); */
+        QueryWrapper<LinkDO> wrapper = new QueryWrapper<LinkDO>()
+                .select("gid as gid, count(*) as shortLinkCount")
+                .in("gid", gids)
+                .eq("enable_status", 0)
+                .groupBy("gid");
+        List<Map<String, Object>> list = baseMapper.selectMaps(wrapper);
+        return BeanUtil.copyToList(list, LinkCountQueryRespDTO.class);
     }
 
     private String generateShortLink(LinkCreateReqDTO requestParam) {
