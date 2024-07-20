@@ -19,6 +19,7 @@ import com.pumpkins.shortlink.admin.dto.req.UserRegisterReqDTO;
 import com.pumpkins.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserLoginRespDTO;
 import com.pumpkins.shortlink.admin.dto.resp.UserRespDTO;
+import com.pumpkins.shortlink.admin.service.GroupService;
 import com.pumpkins.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
+    private final GroupService groupService;
 
     /**
      * 更具用户名返回用户信息
@@ -99,6 +101,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                 // 同步到布隆过滤器
                 userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
                 log.info("新建用户成功->{}", requestParam.getUsername());
+                // 为用户新增默认分组
+                groupService.save(requestParam.getUsername(), "默认分组");
             } else {
                 throw new ClientException(UserErrorCodeEnum.USER_EXIST);
             }

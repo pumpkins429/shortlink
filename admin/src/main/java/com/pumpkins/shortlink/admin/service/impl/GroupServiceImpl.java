@@ -49,6 +49,17 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
      */
     @Override
     public void save(String groupName) {
+        save(UserContext.getUsername(), groupName);
+    }
+
+    /**
+     * 新增分组
+     *
+     * @param username
+     * @param groupName
+     */
+    @Override
+    public void save(String username, String groupName) {
         // TODO 增加权限验证
         String gid;
         do {
@@ -57,7 +68,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         GroupDO groupDO = GroupDO.builder()
                 .gid(gid)
                 .name(groupName)
-                .username(UserContext.getUsername())
+                .username(username)
                 .sortOrder(0)
                 .build();
         // 数据库给gid和username加了复合索引
