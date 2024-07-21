@@ -5,9 +5,9 @@ import com.pumpkins.shortlink.project.common.convention.result.Result;
 import com.pumpkins.shortlink.project.common.convention.result.Results;
 import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
-import com.pumpkins.shortlink.project.dto.resp.LinkCountQueryRespDTO;
-import com.pumpkins.shortlink.project.dto.resp.LinkCreateRespDTO;
-import com.pumpkins.shortlink.project.dto.resp.LinkPageRespDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkUpdateGroupReqDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkUpdateReqDTO;
+import com.pumpkins.shortlink.project.dto.resp.*;
 import com.pumpkins.shortlink.project.service.LinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -56,4 +56,23 @@ public class LinkController {
         return Results.success(linkService.queryLinkCount(gids));
     }
 
+    /**
+     * 修改短链接
+     * @param requestParam
+     * @return
+     */
+    @PutMapping("/api/short-link/v1/link")
+    public Result<LinkUpdateRespDTO> updateLink(@RequestBody LinkUpdateReqDTO requestParam) {
+        return Results.success(linkService.updateLink(requestParam));
+    }
+
+    /**
+     * 更新短链分组
+     * @param requestParam
+     * @return
+     */
+    @PutMapping("/api/short-link/v1/link-group")
+    public Result<LinkUpdateGroupResqDTO> updateLinkGroup(@RequestBody LinkUpdateGroupReqDTO requestParam) {
+        return Results.success(linkService.updateLinkGroup(requestParam));
+    }
 }

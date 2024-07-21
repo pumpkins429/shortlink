@@ -10,9 +10,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
-import com.pumpkins.shortlink.project.dto.resp.LinkCountQueryRespDTO;
-import com.pumpkins.shortlink.project.dto.resp.LinkCreateRespDTO;
-import com.pumpkins.shortlink.project.dto.resp.LinkPageRespDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkUpdateGroupReqDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkUpdateReqDTO;
+import com.pumpkins.shortlink.project.dto.resp.*;
 
 import java.util.List;
 
@@ -39,4 +39,18 @@ public interface LinkService extends IService<LinkDO> {
      * @return
      */
     List<LinkCountQueryRespDTO> queryLinkCount(List<String> gids);
+
+    /**
+     * 更改短链信息
+     * @param requestParam
+     * @return
+     */
+    LinkUpdateRespDTO updateLink(LinkUpdateReqDTO requestParam);
+
+    /**
+     * 更改短链分组
+     * @param requestParam
+     * @return
+     */
+    LinkUpdateGroupResqDTO updateLinkGroup(LinkUpdateGroupReqDTO requestParam);
 }

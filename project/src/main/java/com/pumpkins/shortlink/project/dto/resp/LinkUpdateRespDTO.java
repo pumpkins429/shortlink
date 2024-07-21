@@ -1,44 +1,24 @@
-package com.pumpkins.shortlink.project.dao.entity;
+package com.pumpkins.shortlink.project.dto.resp;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.pumpkins.shortlink.project.common.database.BaseDO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 import java.util.Date;
 
 /*
  * @author      : pumpkins
- * @date        : 2024/7/16 14:14
- * @description : 短链实体类
+ * @date        : 2024/7/21 16:41
+ * @description : 更改短链返回参数
  * @Copyright   : ...
  */
 @Data
-@TableName("t_link")
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Accessors(chain = true)
-public class LinkDO extends BaseDO {
-    /**
-     * id
-     */
-    private Long id;
-
-    /**
-     * 域名
-     */
-    private String domain;
-
-    /**
-     * 短链接
-     */
-    private String shortUri;
-
+@Builder
+public class LinkUpdateRespDTO {
     /**
      * 完整短链接
      */
@@ -70,16 +50,6 @@ public class LinkDO extends BaseDO {
     private String favicon;
 
     /**
-     * 启用标识 0：未启用 1：已启用
-     */
-    private int enableStatus;
-
-    /**
-     * 创建类型 0：控制台 1：接口
-     */
-    private int createdType;
-
-    /**
      * 有效期类型 0：永久有效 1：用户自定义
      */
     private int validDateType;
@@ -94,5 +64,4 @@ public class LinkDO extends BaseDO {
      */
     @TableField("`describe`")
     private String describe;
-
 }
