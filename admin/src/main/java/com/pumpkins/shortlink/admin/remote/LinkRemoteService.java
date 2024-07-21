@@ -8,11 +8,13 @@ import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.admin.common.convention.result.Result;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkPageReqDTO;
-import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
-import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
-import com.pumpkins.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
+import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateGroupReqDTO;
+import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateReqDTO;
+import com.pumpkins.shortlink.admin.remote.dto.resp.*;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -122,6 +124,74 @@ public interface LinkRemoteService {
         } catch (Exception e) {
             throw new ClientException("请求异常");
         }
+        return JSON.parseObject(resultJsonStr, new TypeReference<>() {
+        });
+    }
+
+    /**
+     * 修改短链接
+     * @param requestParam
+     * @return
+     */
+    default Result<LinkUpdateRespDTO> updateLink(LinkUpdateReqDTO requestParam) {
+        String url = "http://localhost:8001/api/short-link/v1/link";
+
+        // 创建HttpRequest实例，设置请求方法、URL、头和请求体
+        HttpRequest request = null;
+        try {
+            request = HttpRequest.newBuilder()
+                    .uri(new URI(url))
+                    .header("Content-Type", "application/json")
+                    .header("username", UserContext.getUsername())
+                    .header("token", UserContext.getToken())
+                    .method("PUT", BodyPublishers.ofString(JSON.toJSONString(requestParam)))
+                    .build();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 发送请求并接收响应
+        String resultJsonStr = null;
+        try {
+            resultJsonStr = CLIENT.send(request, BodyHandlers.ofString()).body();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return JSON.parseObject(resultJsonStr, new TypeReference<>() {
+        });
+    }
+
+    /**
+     * 更新短链分组
+     * @param requestParam
+     * @return
+     */
+    default Result<LinkUpdateGroupResqDTO> updateLinkGroup(LinkUpdateGroupReqDTO requestParam) {
+        String url = "http://localhost:8001/api/short-link/v1/link-group";
+
+        // 创建HttpRequest实例，设置请求方法、URL、头和请求体
+        HttpRequest request = null;
+        try {
+            request = HttpRequest.newBuilder()
+                    .uri(new URI(url))
+                    .header("Content-Type", "application/json")
+                    .header("username", UserContext.getUsername())
+                    .header("token", UserContext.getToken())
+                    .method("PUT", BodyPublishers.ofString(JSON.toJSONString(requestParam)))
+                    .build();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 发送请求并接收响应
+        String resultJsonStr = null;
+        try {
+            resultJsonStr = CLIENT.send(request, BodyHandlers.ofString()).body();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         return JSON.parseObject(resultJsonStr, new TypeReference<>() {
         });
     }

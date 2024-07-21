@@ -5,9 +5,9 @@ import com.pumpkins.shortlink.admin.common.convention.result.Result;
 import com.pumpkins.shortlink.admin.remote.LinkRemoteService;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkPageReqDTO;
-import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCountQueryRespDTO;
-import com.pumpkins.shortlink.admin.remote.dto.resp.LinkCreateRespDTO;
-import com.pumpkins.shortlink.admin.remote.dto.resp.LinkPageRespDTO;
+import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateGroupReqDTO;
+import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateReqDTO;
+import com.pumpkins.shortlink.admin.remote.dto.resp.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,9 +49,29 @@ public class LinkRemoteController {
      * @param gids
      * @return
      */
-    @GetMapping("/api/short-link/v1/group-link-count")
+    @GetMapping("/api/short-link/admin/v1/group-link-count")
     public Result<List<LinkCountQueryRespDTO>> queryLinkCount(@RequestParam List<String> gids) {
         return linkRemoteService.queryLinkCount(gids);
+    }
+
+    /**
+     * 修改短链接
+     * @param requestParam
+     * @return
+     */
+    @PutMapping("/api/short-link/admin/v1/link")
+    public Result<LinkUpdateRespDTO> updateLink(@RequestBody LinkUpdateReqDTO requestParam) {
+        return linkRemoteService.updateLink(requestParam);
+    }
+
+    /**
+     * 更新短链分组
+     * @param requestParam
+     * @return
+     */
+    @PutMapping("/api/short-link/admin/v1/link-group")
+    public Result<LinkUpdateGroupResqDTO> updateLinkGroup(@RequestBody LinkUpdateGroupReqDTO requestParam) {
+        return linkRemoteService.updateLinkGroup(requestParam);
     }
 
 }
