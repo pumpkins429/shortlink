@@ -177,13 +177,10 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
                 .eq(LinkDO::getGid, linkDO.getGid())
                 .eq(LinkDO::getFullShortUrl, requestParam.getFullShortUrl())
-                .eq(LinkDO::getDelFlag, 0)
-                .set(LinkDO::getUpdateTime, new Date());
-        linkDO.setDelFlag(1);
-        baseMapper.update(linkDO, updateWrapper);
+                .eq(LinkDO::getDelFlag, 0);
+        baseMapper.delete(updateWrapper);
 
         linkDO.setGid(requestParam.getNewGid());
-        linkDO.setDelFlag(0);
         baseMapper.insert(linkDO);
         return BeanUtil.toBean(linkDO, LinkUpdateGroupResqDTO.class);
     }
