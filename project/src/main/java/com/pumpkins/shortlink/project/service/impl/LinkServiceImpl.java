@@ -200,6 +200,13 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
         linkDO.setGid(requestParam.getNewGid());
         baseMapper.insert(linkDO);
+
+        // 修改短链路由表 由于路由表的分片键为full_short_url，因此直接修改gid即可
+        linkGotoService.update(Wrappers.lambdaUpdate(LinkGotoDO.class)
+                .eq(LinkGotoDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .set(LinkGotoDO::getGid, requestParam.getNewGid())
+        );
+
         return BeanUtil.toBean(linkDO, LinkUpdateGroupResqDTO.class);
     }
 
