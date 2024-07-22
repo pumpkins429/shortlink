@@ -19,7 +19,8 @@ public class UserConfiguration {
     public FilterRegistrationBean<UserTransmitFilter> globalUserTransmitFilter(StringRedisTemplate stringRedisTemplate) {
         FilterRegistrationBean<UserTransmitFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new UserTransmitFilter(stringRedisTemplate));
-        registration.addUrlPatterns("/*");
+        // registration.addUrlPatterns("/*");
+        registration.addUrlPatterns("/api/short-link/v1/*");
         registration.setOrder(0);
         return registration;
     }
