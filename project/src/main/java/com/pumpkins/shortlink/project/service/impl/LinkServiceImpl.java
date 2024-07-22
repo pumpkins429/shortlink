@@ -13,17 +13,21 @@ import com.pumpkins.shortlink.project.common.convention.exception.ClientExceptio
 import com.pumpkins.shortlink.project.common.convention.exception.ServiceException;
 import com.pumpkins.shortlink.project.common.enums.LinkValidateTypeEnum;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
+import com.pumpkins.shortlink.project.dao.entity.LinkGotoDO;
 import com.pumpkins.shortlink.project.dao.mapper.LinkMapper;
 import com.pumpkins.shortlink.project.dto.req.LinkCreateReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkUpdateGroupReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkUpdateReqDTO;
 import com.pumpkins.shortlink.project.dto.resp.*;
+import com.pumpkins.shortlink.project.service.LinkGotoService;
 import com.pumpkins.shortlink.project.service.LinkService;
 import com.pumpkins.shortlink.project.toolkit.HashUtil;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +49,9 @@ import java.util.Objects;
 public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements LinkService {
 
     private final RBloomFilter<String> bloomFilter;
+    @Lazy
+    @Resource
+    private LinkGotoService linkGotoService;
 
     /**
      * 创建短链接
@@ -52,9 +59,11 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
      * @param requestParam
      * @return
      */
+    @Transactional
     @Override
     public LinkCreateRespDTO saveLink(LinkCreateReqDTO requestParam) {
-        // TODO 校验网址格式等  域名应该由系统指定
+        // TODO 校验网址格式等  域名应该由系统指定 这里先统一指定为link.url
+        requestParam.setDomain("link.url");
         String fullShortLink = generateShortLink(requestParam);
         LinkDO linkDO = BeanUtil.toBean(requestParam, LinkDO.class);
         linkDO.setEnableStatus(0);
@@ -63,15 +72,24 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setFullShortUrl(fullShortLink);
         try {
             baseMapper.insert(linkDO);
+            // 同步短链路由表
+            linkGotoService.save(
+                    LinkGotoDO.builder()
+                            .fullShortUrl(fullShortLink)
+                            .gid(linkDO.getGid())
+                            .build()
+            );
         } catch (DuplicateKeyException e) {
             bloomFilter.add(fullShortLink); // 防止布隆过滤器误判，防刷
+            log.error(String.valueOf(e));
             throw new ServiceException("数据库插入记录失败");
         }
 
         bloomFilter.add(fullShortLink);
         return LinkCreateRespDTO.builder()
                 .gid(linkDO.getGid())
-                .fullShortUrl(linkDO.getFullShortUrl())
+                // TODO 协议后续统一指定
+                .fullShortUrl("http://" + linkDO.getFullShortUrl())
                 .originUrl(requestParam.getOriginUrl())
                 .build();
     }

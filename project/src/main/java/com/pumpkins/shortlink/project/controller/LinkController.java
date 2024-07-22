@@ -8,7 +8,10 @@ import com.pumpkins.shortlink.project.dto.req.LinkPageReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkUpdateGroupReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkUpdateReqDTO;
 import com.pumpkins.shortlink.project.dto.resp.*;
+import com.pumpkins.shortlink.project.service.LinkGotoService;
 import com.pumpkins.shortlink.project.service.LinkService;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +28,18 @@ import java.util.List;
 public class LinkController {
 
     private final LinkService linkService;
+    private final LinkGotoService linkGotoService;
+
+    /**
+     * 短链跳转
+     * @param shortUri
+     * @param request
+     * @param response
+     */
+    @GetMapping("{short-uri}")
+    public void restoreUrl(@PathVariable("short-uri") String shortUri, ServletRequest request, ServletResponse response) {
+        linkGotoService.restoreUrl(shortUri, request, response);
+    }
 
     /**
      * 创建短链
