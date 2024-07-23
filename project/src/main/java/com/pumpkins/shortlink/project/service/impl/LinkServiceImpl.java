@@ -86,8 +86,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         }
 
         // 缓存预热
-        
-        // 加入
+
+        // 加入布隆过滤器防重
         shortlinkCachePenetrationBloomFilter.add(fullShortLink);
         return LinkCreateRespDTO.builder()
                 .gid(linkDO.getGid())
