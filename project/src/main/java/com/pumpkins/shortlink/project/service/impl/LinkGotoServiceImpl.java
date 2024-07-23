@@ -23,6 +23,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -72,7 +73,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
 
         // 防止布隆过滤器误判
         String shortLinkGotoIsNull = stringRedisTemplate.opsForValue().get(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl);
-        if (RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY.equals(shortLinkGotoIsNull)) {
+        if (RedisCacheConstants.SHORT_LINK_GOTO_NULL_VALUE.equals(shortLinkGotoIsNull)) {
             return;
         }
 
@@ -105,6 +106,11 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                     .eq(LinkDO::getDelFlag, 0);
             LinkDO linkDO = linkService.getOne(linkDOLambdaQueryWrapper);
             if (linkDO != null) {
+                // 判断是否过期 过期就设置空值
+                if (linkDO.getValidDate() != null && linkDO.getValidDate().before(new Date())) {
+                    stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl, RedisCacheConstants.SHORT_LINK_GOTO_NULL_VALUE, 30, TimeUnit.MINUTES);
+                    return;
+                }
                 // 保存到缓存中
                 stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl, linkDO.getOriginUrl(), 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
