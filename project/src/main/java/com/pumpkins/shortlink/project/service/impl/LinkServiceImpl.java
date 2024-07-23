@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pumpkins.shortlink.project.common.biz.user.UserContext;
+import com.pumpkins.shortlink.project.common.constant.RedisCacheConstants;
 import com.pumpkins.shortlink.project.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.project.common.convention.exception.ServiceException;
 import com.pumpkins.shortlink.project.common.enums.LinkValidateTypeEnum;
@@ -23,12 +24,14 @@ import com.pumpkins.shortlink.project.dto.resp.*;
 import com.pumpkins.shortlink.project.service.LinkGotoService;
 import com.pumpkins.shortlink.project.service.LinkService;
 import com.pumpkins.shortlink.project.toolkit.HashUtil;
+import com.pumpkins.shortlink.project.toolkit.LinkUtil;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /*
  * @author      : pumpkins
@@ -52,6 +56,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     @Lazy
     @Resource
     private LinkGotoService linkGotoService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     /**
      * 创建短链接
@@ -86,7 +91,12 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         }
 
         // 缓存预热
-
+        stringRedisTemplate.opsForValue().set(
+                RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortLink,
+                requestParam.getOriginUrl(),
+                LinkUtil.getShortLinkCacheExpireTime(requestParam.getValidDate()),
+                TimeUnit.MILLISECONDS
+        );
         // 加入布隆过滤器防重
         shortlinkCachePenetrationBloomFilter.add(fullShortLink);
         return LinkCreateRespDTO.builder()
@@ -235,4 +245,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         } while (true);
         return fullShortLink;
     }
+
+    /**
+     * TODO 删除短链
+     */
 }

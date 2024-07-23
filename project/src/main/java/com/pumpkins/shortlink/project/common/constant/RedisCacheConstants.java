@@ -31,4 +31,9 @@ public class RedisCacheConstants {
      */
     public static final String SHORT_LINK_GOTO_NULL_VALUE = "-";
 
+    /**
+     * 永久有效的短链的缓存默认有效时间，单位为毫秒
+     */
+    public static final Long SHORT_LINK_DEFAULT_VALIDATE_TIME = 2629800000L;
+
 }
