@@ -17,9 +17,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.Redisson;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
     private final RBloomFilter<String> bloomFilter;
     private final LinkService linkService;
     private final StringRedisTemplate stringRedisTemplate;
-    private final Redisson redisson;
+    private final RedissonClient redissonClient;
 
     /**
      * 短链跳转
@@ -62,7 +62,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             return;
         }
         // 获取分布式锁
-        RLock linkLock = redisson.getLock(RedisCacheConstants.LOCK_SHORT_LINK_GOTO_KEY + fullShortUrl);
+        RLock linkLock = redissonClient.getLock(RedisCacheConstants.LOCK_SHORT_LINK_GOTO_KEY + fullShortUrl);
         linkLock.lock();
         try {
             // 双重检查锁
