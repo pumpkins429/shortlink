@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO> implements LinkGotoService {
 
-    private final RBloomFilter<String> bloomFilter;
+    private final RBloomFilter<String> shortlinkCachePenetrationBloomFilter;
     private final LinkService linkService;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
@@ -65,7 +65,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
         }
 
         // 查看布隆过滤器
-        if (!bloomFilter.contains(fullShortUrl)) {
+        if (!shortlinkCachePenetrationBloomFilter.contains(fullShortUrl)) {
             // 布隆过滤器中不存在说明数据库中肯定不存在
             return;
         }

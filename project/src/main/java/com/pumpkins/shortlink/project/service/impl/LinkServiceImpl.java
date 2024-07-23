@@ -48,7 +48,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements LinkService {
 
-    private final RBloomFilter<String> bloomFilter;
+    private final RBloomFilter<String> shortlinkCachePenetrationBloomFilter;
     @Lazy
     @Resource
     private LinkGotoService linkGotoService;
@@ -80,12 +80,15 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                             .build()
             );
         } catch (DuplicateKeyException e) {
-            bloomFilter.add(fullShortLink); // 防止布隆过滤器误判，防刷
+            shortlinkCachePenetrationBloomFilter.add(fullShortLink); // 防止布隆过滤器误判，防刷
             log.error(String.valueOf(e));
             throw new ServiceException("数据库插入记录失败");
         }
 
-        bloomFilter.add(fullShortLink);
+        // 缓存预热
+        
+        // 加入
+        shortlinkCachePenetrationBloomFilter.add(fullShortLink);
         return LinkCreateRespDTO.builder()
                 .gid(linkDO.getGid())
                 // TODO 协议后续统一指定
@@ -224,7 +227,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .append("/")
                     .append(HashUtil.hashToBase62(requestParam.getOriginUrl() + salt))
                     .toString();
-            if (!bloomFilter.contains(fullShortLink)) {
+            if (!shortlinkCachePenetrationBloomFilter.contains(fullShortLink)) {
                 break;
             }
             salt = String.valueOf(System.currentTimeMillis()); // 加盐
