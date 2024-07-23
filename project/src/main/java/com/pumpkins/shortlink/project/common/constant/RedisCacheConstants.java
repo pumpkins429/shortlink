@@ -22,4 +22,13 @@ public class RedisCacheConstants {
      */
     public static final String SHORT_LINK_GOTO_KEY = "short-link:short_link_goto:";
 
+    /**
+     * 短链空值前缀
+     */
+    public static final String SHORT_LINK_GOTO_ISNULL_KEY = "short-link:short_link_goto_is_null:";
+    /**
+     * 代表短链不存在的空值
+     */
+    public static final String SHORT_LINK_GOTO_NULL_VALUE = "-";
+
 }

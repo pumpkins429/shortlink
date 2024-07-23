@@ -23,6 +23,8 @@ import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 /*
  * @author      : pumpkins
  * @date        : 2024/7/16 14:23
@@ -61,6 +63,19 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             ((HttpServletResponse) response).sendRedirect(originUrl);
             return;
         }
+
+        // 查看布隆过滤器
+        if (!bloomFilter.contains(fullShortUrl)) {
+            // 布隆过滤器中不存在说明数据库中肯定不存在
+            return;
+        }
+
+        // 防止布隆过滤器误判
+        String shortLinkGotoIsNull = stringRedisTemplate.opsForValue().get(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl);
+        if (RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY.equals(shortLinkGotoIsNull)) {
+            return;
+        }
+
         // 获取分布式锁
         RLock linkLock = redissonClient.getLock(RedisCacheConstants.LOCK_SHORT_LINK_GOTO_KEY + fullShortUrl);
         linkLock.lock();
@@ -79,6 +94,8 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             LinkGotoDO linkGotoDO = baseMapper.selectOne(linkGotoDOLambdaQueryWrapper);
             if (linkGotoDO == null) {
                 // TODO 此处应该进行风控
+                stringRedisTemplate.opsForValue()
+                        .set(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl, RedisCacheConstants.SHORT_LINK_GOTO_NULL_VALUE, 30, TimeUnit.SECONDS);
                 return;
             }
             LambdaQueryWrapper<LinkDO> linkDOLambdaQueryWrapper = Wrappers.lambdaQuery(LinkDO.class)
@@ -89,7 +106,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             LinkDO linkDO = linkService.getOne(linkDOLambdaQueryWrapper);
             if (linkDO != null) {
                 // 保存到缓存中
-                stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl, linkDO.getOriginUrl());
+                stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl, linkDO.getOriginUrl(), 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
             }
         } finally {
