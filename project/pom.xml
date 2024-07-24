@@ -57,6 +57,11 @@
             <artifactId>fastjson2</artifactId>
         </dependency>
 
+        <!-- 用于返回404 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

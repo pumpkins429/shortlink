@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.pumpkins.shortlink.project.common.constant.LinkConstants;
 import com.pumpkins.shortlink.project.common.constant.RedisCacheConstants;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dao.entity.LinkGotoDO;
@@ -68,12 +69,14 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
         // 查看布隆过滤器
         if (!shortlinkCachePenetrationBloomFilter.contains(fullShortUrl)) {
             // 布隆过滤器中不存在说明数据库中肯定不存在
+            ((HttpServletResponse) response).sendRedirect(LinkConstants.SHORT_LINK_NOT_FOUND_PAGE);
             return;
         }
 
         // 防止布隆过滤器误判
         String shortLinkGotoIsNull = stringRedisTemplate.opsForValue().get(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl);
         if (RedisCacheConstants.SHORT_LINK_GOTO_NULL_VALUE.equals(shortLinkGotoIsNull)) {
+            ((HttpServletResponse) response).sendRedirect(LinkConstants.SHORT_LINK_NOT_FOUND_PAGE);
             return;
         }
 
@@ -97,6 +100,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                 // TODO 此处应该进行风控
                 stringRedisTemplate.opsForValue()
                         .set(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl, RedisCacheConstants.SHORT_LINK_GOTO_NULL_VALUE, 30, TimeUnit.SECONDS);
+                ((HttpServletResponse) response).sendRedirect(LinkConstants.SHORT_LINK_NOT_FOUND_PAGE);
                 return;
             }
             LambdaQueryWrapper<LinkDO> linkDOLambdaQueryWrapper = Wrappers.lambdaQuery(LinkDO.class)
@@ -109,6 +113,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                 // 判断是否过期 过期就设置空值
                 if (linkDO.getValidDate() != null && linkDO.getValidDate().before(new Date())) {
                     stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl, RedisCacheConstants.SHORT_LINK_GOTO_NULL_VALUE, 30, TimeUnit.MINUTES);
+                    ((HttpServletResponse) response).sendRedirect(LinkConstants.SHORT_LINK_NOT_FOUND_PAGE);
                     return;
                 }
                 // 保存到缓存中
