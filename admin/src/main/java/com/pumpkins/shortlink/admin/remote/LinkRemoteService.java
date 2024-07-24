@@ -11,6 +11,7 @@ import com.pumpkins.shortlink.admin.remote.dto.req.LinkPageReqDTO;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateGroupReqDTO;
 import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateReqDTO;
 import com.pumpkins.shortlink.admin.remote.dto.resp.*;
+import lombok.SneakyThrows;
 
 import java.io.IOException;
 import java.net.URI;
@@ -195,4 +196,29 @@ public interface LinkRemoteService {
         return JSON.parseObject(resultJsonStr, new TypeReference<>() {
         });
     }
+
+    /**
+     * 获取url标题
+     * @param url
+     * @return
+     */
+    @SneakyThrows
+    default Result<String> getUrlTile(String url) {
+        String requestUrl = "http://localhost:8001/api/short-link/v1/tile?url=" + url;
+
+        // 创建HttpRequest实例，设置请求方法、URL、头和请求体
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(requestUrl))
+                .header("Content-Type", "application/json")
+                .header("username", UserContext.getUsername())
+                .header("token", UserContext.getToken())
+                .method("GET", BodyPublishers.noBody())
+                .build();
+
+        // 发送请求并接收响应
+        String resultJsonStr = CLIENT.send(request, BodyHandlers.ofString()).body();
+        return JSON.parseObject(resultJsonStr, new TypeReference<>() {
+        });
+    }
+
 }
