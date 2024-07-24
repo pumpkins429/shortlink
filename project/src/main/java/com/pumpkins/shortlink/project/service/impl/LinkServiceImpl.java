@@ -27,7 +27,11 @@ import com.pumpkins.shortlink.project.toolkit.HashUtil;
 import com.pumpkins.shortlink.project.toolkit.LinkUtil;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.redisson.api.RBloomFilter;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
@@ -35,11 +39,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.HttpURLConnection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.net.URL;
 
 /*
  * @author      : pumpkins
@@ -75,6 +81,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setUsername(UserContext.getUsername());
         linkDO.setShortUri(fullShortLink.substring(fullShortLink.lastIndexOf("/") + 1));
         linkDO.setFullShortUrl(fullShortLink);
+        linkDO.setFavicon(getUrlFavicon(requestParam.getOriginUrl()));
         try {
             baseMapper.insert(linkDO);
             // 同步短链路由表
@@ -174,11 +181,11 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 // 如果有效期设为永久，则将有效期设置为空
                 .set(Objects.equals(requestParam.getValidDateType(), LinkValidateTypeEnum.PERMANENT.getType()), LinkDO::getValidDate, null);
         // 暂时支持更改的信息为原始链接、有效时间、短链描述
-        // TODO 这里的favicon，如果修改了原链接，也需要修改 后续描述也可以修改为自动爬取
         linkDO.setOriginUrl(requestParam.getOriginUrl())
                 .setValidDateType(requestParam.getValidDateType())
                 .setValidDate(Objects.equals(requestParam.getValidDateType(), LinkValidateTypeEnum.PERMANENT.getType()) ? null : requestParam.getValidDate())
-                .setDescribe(requestParam.getDescribe());
+                .setDescribe(requestParam.getDescribe())
+                .setFavicon(Objects.equals(linkDO.getOriginUrl(), requestParam.getOriginUrl()) ? linkDO.getFavicon() : getUrlFavicon(requestParam.getOriginUrl()));
         baseMapper.update(linkDO, updateWrapper);
         return BeanUtil.toBean(linkDO, LinkUpdateRespDTO.class);
     }
@@ -249,4 +256,56 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     /**
      * TODO 删除短链
      */
+
+    /**
+     * 获取网址icon
+     * TODO 后续优化性能
+     *
+     * @param url
+     * @return
+     */
+    @SneakyThrows
+    private String getUrlFavicon(String url) {
+        URL targetUrl = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
+        // 禁止自动处理重定向
+        connection.setInstanceFollowRedirects(false);
+        connection.setRequestMethod("GET");
+        connection.connect();
+        // 获取响应码
+        int responseCode = connection.getResponseCode();
+        // 如果为重定向响应码
+        if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+            // 获取重定向的URL
+            String redirectUrl = connection.getHeaderField("Location");
+            // 如果重定向URL不为空
+            if (redirectUrl != null) {
+                // 创建新的URL对象
+                URL newUrl = new URL(redirectUrl);
+                // 打开新的连接
+                connection = (HttpURLConnection) newUrl.openConnection();
+                // 设置请求方法为GET
+                connection.setRequestMethod("GET");
+                // 连接
+                connection.connect();
+                // 获取新的响应码
+                responseCode = connection.getResponseCode();
+            }
+        }
+        // 如果响应码为200（HTTP_0K）
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            // 使用Jsoup库连接到URL并获取文档对象
+            Document document = Jsoup.connect(url).get();
+            // 选择第一个匹配的<link>标签，其rel属性包含"shortcut"或"icon"
+            // TODO 待优化，有一些网址还是无法匹配到favicon
+            Element faviconLink = document.select("Link[rel~=(?i)^(shortcut )?icon]").first();
+            // 如果存在favicon图标链接
+            if (faviconLink != null) {
+                // 返回图标链接的绝对路径 TODO 后续优化为OSS存储或minIO存储
+                return faviconLink.attr("abs:href");
+            }
+        }
+        // 如果不存在favicon图标链接，则返回null
+        return null;
+    }
 }
