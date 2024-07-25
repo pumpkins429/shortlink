@@ -6,10 +6,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.pumpkins.shortlink.admin.common.biz.user.UserContext;
 import com.pumpkins.shortlink.admin.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.admin.common.convention.result.Result;
-import com.pumpkins.shortlink.admin.remote.dto.req.LinkCreateReqDTO;
-import com.pumpkins.shortlink.admin.remote.dto.req.LinkPageReqDTO;
-import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateGroupReqDTO;
-import com.pumpkins.shortlink.admin.remote.dto.req.LinkUpdateReqDTO;
+import com.pumpkins.shortlink.admin.common.convention.result.Results;
+import com.pumpkins.shortlink.admin.remote.dto.req.*;
 import com.pumpkins.shortlink.admin.remote.dto.resp.*;
 import lombok.SneakyThrows;
 
@@ -219,6 +217,15 @@ public interface LinkRemoteService {
         String resultJsonStr = CLIENT.send(request, BodyHandlers.ofString()).body();
         return JSON.parseObject(resultJsonStr, new TypeReference<>() {
         });
+    }
+
+    /**
+     * TODO 短链移至回收站
+     * @param requestParam
+     * @return
+     */
+    default Result<Void> moveToRecycleBin(LinkMoveToRecycleBInReqDTO requestParam) {
+        return Results.success();
     }
 
 }
