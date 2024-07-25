@@ -125,7 +125,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     public IPage<LinkPageRespDTO> queryLinkPage(LinkPageReqDTO requestParam) {
         LambdaQueryWrapper<LinkDO> wrapper = Wrappers.lambdaQuery(LinkDO.class)
                 .eq(LinkDO::getGid, requestParam.getGid())
-                // .eq(LinkDO::getEnableStatus, 1)
+                .eq(LinkDO::getEnableStatus, 1)
                 .eq(LinkDO::getUsername, UserContext.getUsername())
                 .orderByDesc(LinkDO::getCreateTime);
         IPage<LinkDO> resultPage = baseMapper.selectPage(requestParam, wrapper);
