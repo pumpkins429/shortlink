@@ -202,6 +202,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         LambdaQueryWrapper<LinkDO> wrapper = Wrappers.lambdaQuery(LinkDO.class)
                 .eq(LinkDO::getGid, requestParam.getOriginGid())
                 .eq(LinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(LinkDO::getEnableStatus, 1)
                 .eq(LinkDO::getDelFlag, 0);
         LinkDO linkDO = baseMapper.selectOne(wrapper);
         if (linkDO == null) {
