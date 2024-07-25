@@ -106,7 +106,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             LambdaQueryWrapper<LinkDO> linkDOLambdaQueryWrapper = Wrappers.lambdaQuery(LinkDO.class)
                     .eq(LinkDO::getGid, linkGotoDO.getGid())
                     .eq(LinkDO::getFullShortUrl, fullShortUrl)
-                    .eq(LinkDO::getEnableStatus, 0)
+                    .eq(LinkDO::getEnableStatus, 1)
                     .eq(LinkDO::getDelFlag, 0);
             LinkDO linkDO = linkService.getOne(linkDOLambdaQueryWrapper);
             if (linkDO != null) {
@@ -119,6 +119,10 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                 // 保存到缓存中
                 stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl, linkDO.getOriginUrl(), 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
+            } else {
+                stringRedisTemplate.opsForValue()
+                        .set(RedisCacheConstants.SHORT_LINK_GOTO_ISNULL_KEY + fullShortUrl, RedisCacheConstants.SHORT_LINK_GOTO_NULL_VALUE, 30, TimeUnit.SECONDS);
+                ((HttpServletResponse) response).sendRedirect(LinkConstants.SHORT_LINK_NOT_FOUND_PAGE);
             }
         } finally {
             linkLock.unlock();
