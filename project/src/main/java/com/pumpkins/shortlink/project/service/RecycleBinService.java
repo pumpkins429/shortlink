@@ -5,7 +5,10 @@ package com.pumpkins.shortlink.project.service;/*
  * @Copyright   : ...
  */
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.pumpkins.shortlink.project.dto.req.LinkMoveToRecycleBInReqDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkRecycleBinPageReqDTO;
+import com.pumpkins.shortlink.project.dto.resp.LinkRecycleBinPageRespDTO;
 
 public interface RecycleBinService {
     /**
@@ -13,4 +16,11 @@ public interface RecycleBinService {
      * @return
      */
     void moveToRecycleBin(LinkMoveToRecycleBInReqDTO requestParam);
+
+    /**
+     * 分页查询
+     * @param requestParam
+     * @return
+     */
+    IPage<LinkRecycleBinPageRespDTO> queryPage(LinkRecycleBinPageReqDTO requestParam);
 }

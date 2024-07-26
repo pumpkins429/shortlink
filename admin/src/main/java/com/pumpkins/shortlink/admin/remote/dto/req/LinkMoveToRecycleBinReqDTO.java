@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class LinkMoveToRecycleBInReqDTO {
+public class LinkMoveToRecycleBinReqDTO {
 
     /**
      * 分组标识

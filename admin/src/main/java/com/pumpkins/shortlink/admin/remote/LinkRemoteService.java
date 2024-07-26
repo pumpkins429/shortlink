@@ -120,12 +120,12 @@ public interface LinkRemoteService {
     }
 
     /**
-     * TODO 短链移至回收站
+     * 短链移至回收站
      *
      * @param requestParam
      * @return
      */
-    default Result<Void> moveToRecycleBin(LinkMoveToRecycleBInReqDTO requestParam) {
+    default Result<Void> moveToRecycleBin(LinkMoveToRecycleBinReqDTO requestParam) {
         return LinkHttpUtil.request(
                 "POST",
                 "http://localhost:8001/api/short-link/v1/recycleBin/recycle",
@@ -134,5 +134,22 @@ public interface LinkRemoteService {
                 }
         );
     }
+
+    /**
+     * 查询分组下的移入回收站中的短链
+     *
+     * @param requestParam
+     * @return
+     */
+    default Result<IPage<LinkRecycleBinPageRespDTO>> queryRecycleBinPage(LinkRecycleBinPageReqDTO requestParam) {
+         return LinkHttpUtil.request(
+                "GET",
+                "http://localhost:8001/api/short-link/v1/recycleBin/page",
+                requestParam,
+                new TypeReference<>() {
+                }
+        );
+    }
+
 
 }
