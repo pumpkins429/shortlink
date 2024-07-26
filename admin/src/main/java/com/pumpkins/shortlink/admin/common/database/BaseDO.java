@@ -2,6 +2,7 @@ package com.pumpkins.shortlink.admin.common.database;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.util.Date;
@@ -30,5 +31,6 @@ public class BaseDO {
      * 删除标识 0：未删除 1：已删除
      */
     @TableField(fill = FieldFill.INSERT)
+    @TableLogic
     private int delFlag;
 }
