@@ -8,6 +8,8 @@ package com.pumpkins.shortlink.project.service;/*
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.pumpkins.shortlink.project.dto.req.LinkMoveToRecycleBInReqDTO;
 import com.pumpkins.shortlink.project.dto.req.LinkRecycleBinPageReqDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkRecycleBinRecoverReqDTO;
+import com.pumpkins.shortlink.project.dto.req.LinkRecycleBinRemoveReqDTO;
 import com.pumpkins.shortlink.project.dto.resp.LinkRecycleBinPageRespDTO;
 
 public interface RecycleBinService {
@@ -23,4 +25,18 @@ public interface RecycleBinService {
      * @return
      */
     IPage<LinkRecycleBinPageRespDTO> queryPage(LinkRecycleBinPageReqDTO requestParam);
+
+    /**
+     * 恢复短链接
+     * @param requestParam
+     * @return
+     */
+    void recoverFromRecycleBin(LinkRecycleBinRecoverReqDTO requestParam);
+
+    /**
+     * 从回收站彻底删除短链接
+     * @param requestParam
+     * @return
+     */
+    void recoverFromRemoveBin(LinkRecycleBinRemoveReqDTO requestParam);
 }
