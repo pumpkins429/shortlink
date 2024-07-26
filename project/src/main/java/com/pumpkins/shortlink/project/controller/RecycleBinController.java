@@ -62,7 +62,7 @@ public class RecycleBinController {
      */
     @DeleteMapping("/api/short-link/v1/recycleBin/remove")
     public Result<Void> removeFromRecycleBin(@RequestBody LinkRecycleBinRemoveReqDTO requestParam) {
-        recycleBinService.recoverFromRemoveBin(requestParam);
+        recycleBinService.removeFromRemoveBin(requestParam);
         return Results.success();
     }
 }

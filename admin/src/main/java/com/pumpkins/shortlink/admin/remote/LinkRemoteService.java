@@ -151,6 +151,36 @@ public interface LinkRemoteService {
         );
     }
 
+    /**
+     * 从回收站恢复短链
+     *
+     * @param requestParam
+     * @return
+     */
+    default Result<Void> recoverFromRecycleBin(LinkRecycleBinRecoverReqDTO requestParam) {
+        return LinkHttpUtil.request(
+                "POST",
+                "http://localhost:8001/api/short-link/v1/recycleBin/recover",
+                requestParam,
+                new TypeReference<>() {
+                }
+        );
+    }
 
+    /**
+     * 从回收站彻底删除短链
+     *
+     * @param requestParam
+     * @return
+     */
+    default Result<Void> removeFromRecycleBin(LinkRecycleBinRemoveReqDTO requestParam) {
+        return LinkHttpUtil.request(
+                "DELETE",
+                "http://localhost:8001/api/short-link/v1/recycleBin/remove",
+                requestParam,
+                new TypeReference<>() {
+                }
+        );
+    }
 
 }

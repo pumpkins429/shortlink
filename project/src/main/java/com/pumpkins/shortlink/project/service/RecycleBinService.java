@@ -38,5 +38,5 @@ public interface RecycleBinService {
      * @param requestParam
      * @return
      */
-    void recoverFromRemoveBin(LinkRecycleBinRemoveReqDTO requestParam);
+    void removeFromRemoveBin(LinkRecycleBinRemoveReqDTO requestParam);
 }

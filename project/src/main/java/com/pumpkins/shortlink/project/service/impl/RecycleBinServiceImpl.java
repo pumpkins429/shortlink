@@ -103,13 +103,18 @@ public class RecycleBinServiceImpl implements RecycleBinService {
      * @return
      */
     @Override
-    public void recoverFromRemoveBin(LinkRecycleBinRemoveReqDTO requestParam) {
+    public void removeFromRemoveBin(LinkRecycleBinRemoveReqDTO requestParam) {
         LambdaUpdateWrapper<LinkDO> wrapper = Wrappers.lambdaUpdate(LinkDO.class)
                 .in(LinkDO::getGid, requestParam.getGid())
                 .eq(LinkDO::getFullShortUrl, requestParam.getFullShortUrl())
                 .eq(LinkDO::getEnableStatus, 0)
                 .eq(LinkDO::getDelFlag, 0);
-        linkService.remove(wrapper);
+        boolean remove = linkService.remove(wrapper);
+        if (!remove) {
+            throw new ServiceException("删除失败!");
+        }
+        // 删除缓存中的数据
+        stringRedisTemplate.delete(RedisCacheConstants.SHORT_LINK_GOTO_KEY + requestParam.getFullShortUrl());
     }
 
 
