@@ -69,5 +69,6 @@ CREATE TABLE `t_link_access_stats`  (
                                                `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
                                                `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
                                                `del_flag` tinyint(1) NULL DEFAULT NULL COMMENT '删除标识：0 未删除 1 已删除',
-                                               PRIMARY KEY (`id`) USING BTREE
+                                               PRIMARY KEY (`id`) USING BTREE,
+                                               UNIQUE INDEX idx_unique_access_stats (full_short_url, weekday, hour)
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 ROW_FORMAT = Dynamic;
