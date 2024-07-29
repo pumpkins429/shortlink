@@ -31,7 +31,7 @@
               ) ON DUPLICATE KEY
             UPDATE
                 pv = pv + 1,
-                uv = uv + 2,
+                uv = uv + #{uv},
                 uip = uip + 3;
     </insert>
 </mapper>

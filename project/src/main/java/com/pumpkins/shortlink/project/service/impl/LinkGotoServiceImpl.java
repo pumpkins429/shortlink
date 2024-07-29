@@ -1,7 +1,9 @@
 package com.pumpkins.shortlink.project.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.text.StrBuilder;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -17,6 +19,8 @@ import com.pumpkins.shortlink.project.service.LinkGotoService;
 import com.pumpkins.shortlink.project.service.LinkService;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -27,8 +31,11 @@ import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*
  * @author      : pumpkins
@@ -66,7 +73,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
 
         String originUrl = stringRedisTemplate.opsForValue().get(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl);
         if (StrUtil.isNotBlank(originUrl)) {
-            shortLinkAccessStats(shortUri, request);
+            shortLinkAccessStats(shortUri, request, response);
             ((HttpServletResponse) response).sendRedirect(originUrl);
             return;
         }
@@ -92,7 +99,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             // 双重检查锁
             originUrl = stringRedisTemplate.opsForValue().get(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl);
             if (StrUtil.isNotBlank(originUrl)) {
-                shortLinkAccessStats(shortUri, request);
+                shortLinkAccessStats(shortUri, request, response);
                 ((HttpServletResponse) response).sendRedirect(originUrl);
                 return;
             }
@@ -124,7 +131,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                 }
                 // 保存到缓存中
                 stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl, linkDO.getOriginUrl(), 30, TimeUnit.MINUTES);
-                shortLinkAccessStats(shortUri, request);
+                shortLinkAccessStats(shortUri, request, response);
                 ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
             } else {
                 stringRedisTemplate.opsForValue()
@@ -139,14 +146,43 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
 
     /**
      * 短链跳转监控统计
+     * 通过cookie判断uv
      */
-    private void shortLinkAccessStats(String shortUri, ServletRequest request) {
+    private void shortLinkAccessStats(String shortUri, ServletRequest request, ServletResponse response) {
+        AtomicBoolean uvFirstFlag = new AtomicBoolean();
+        Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+        // 第一次访问时返回带uv标识的cookie
+        Runnable addResponseCookieTask = () -> {
+            String uv = UUID.fastUUID().toString();
+            Cookie uvCookie = new Cookie("uv", uv);
+            uvCookie.setMaxAge(60 * 60 * 24 * 31);
+            uvCookie.setPath(StrUtil.sub(shortUri, shortUri.lastIndexOf("/"), shortUri.length()));
+            ((HttpServletResponse) response).addCookie(uvCookie);
+            uvFirstFlag.set(Boolean.TRUE);
+            stringRedisTemplate.opsForSet().add(RedisCacheConstants.SHORT_LINK_STATS_UV + shortUri, uv);
+        };
+
+        // 判断用户是否第一次访问
+        if (ArrayUtil.isNotEmpty(cookies)) {
+            Arrays.stream(cookies)
+                    .filter(each -> Objects.equals(each.getName(), "uv"))
+                    .findFirst()
+                    .map(Cookie::getValue)
+                    .ifPresentOrElse(each -> {
+                                Long added = stringRedisTemplate.opsForSet().add(RedisCacheConstants.SHORT_LINK_STATS_UV + shortUri, each);
+                                uvFirstFlag.set(added != null && added > 0L);
+                            }, addResponseCookieTask
+                    );
+        } else  {
+            addResponseCookieTask.run();
+        }
+
         Date date = new Date();
         LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
                 .fullShortUrl(shortUri)
                 .date(date)
                 .pv(1)
-                .uv(1)
+                .uv(uvFirstFlag.get() ? 1 : 0)
                 .uip(1)
                 .hour(DateUtil.hour(date, true))
                 .weekday(DateUtil.dayOfWeekEnum(date).getIso8601Value())
