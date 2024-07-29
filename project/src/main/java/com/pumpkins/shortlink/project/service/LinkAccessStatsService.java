@@ -7,8 +7,16 @@ package com.pumpkins.shortlink.project.service;/*
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pumpkins.shortlink.project.dao.entity.LinkAccessStatsDO;
+import jakarta.servlet.ServletRequest;
 
 public interface LinkAccessStatsService extends IService<LinkAccessStatsDO> {
 
-
+    /**
+     * 保存监控记录
+     * @param shortUri
+     * @param request
+     * @param linkAccessStatsDO
+     * @return
+     */
+    boolean recordAccessStats(String shortUri, ServletRequest request, LinkAccessStatsDO linkAccessStatsDO);
 }

@@ -1,5 +1,6 @@
 package com.pumpkins.shortlink.project.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -7,9 +8,11 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pumpkins.shortlink.project.common.constant.LinkConstants;
 import com.pumpkins.shortlink.project.common.constant.RedisCacheConstants;
+import com.pumpkins.shortlink.project.dao.entity.LinkAccessStatsDO;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dao.entity.LinkGotoDO;
 import com.pumpkins.shortlink.project.dao.mapper.LinkGotoMapper;
+import com.pumpkins.shortlink.project.service.LinkAccessStatsService;
 import com.pumpkins.shortlink.project.service.LinkGotoService;
 import com.pumpkins.shortlink.project.service.LinkService;
 import jakarta.servlet.ServletRequest;
@@ -42,6 +45,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
     private final LinkService linkService;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
+    private final LinkAccessStatsService linkAccessStatsService;
 
     /**
      * 短链跳转
@@ -62,6 +66,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
 
         String originUrl = stringRedisTemplate.opsForValue().get(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl);
         if (StrUtil.isNotBlank(originUrl)) {
+            shortLinkAccessStats(shortUri, request);
             ((HttpServletResponse) response).sendRedirect(originUrl);
             return;
         }
@@ -87,6 +92,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             // 双重检查锁
             originUrl = stringRedisTemplate.opsForValue().get(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl);
             if (StrUtil.isNotBlank(originUrl)) {
+                shortLinkAccessStats(shortUri, request);
                 ((HttpServletResponse) response).sendRedirect(originUrl);
                 return;
             }
@@ -118,6 +124,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                 }
                 // 保存到缓存中
                 stringRedisTemplate.opsForValue().set(RedisCacheConstants.SHORT_LINK_GOTO_KEY + fullShortUrl, linkDO.getOriginUrl(), 30, TimeUnit.MINUTES);
+                shortLinkAccessStats(shortUri, request);
                 ((HttpServletResponse) response).sendRedirect(linkDO.getOriginUrl());
             } else {
                 stringRedisTemplate.opsForValue()
@@ -128,6 +135,27 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
             linkLock.unlock();
         }
 
+    }
+
+    /**
+     * 短链跳转监控统计
+     */
+    private void shortLinkAccessStats(String shortUri, ServletRequest request) {
+        Date date = new Date();
+        LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
+                .fullShortUrl(shortUri)
+                .date(date)
+                .pv(1)
+                .uv(1)
+                .uip(1)
+                .hour(DateUtil.hour(date, true))
+                .weekday(DateUtil.dayOfWeekEnum(date).getIso8601Value())
+                .build();
+        try {
+            linkAccessStatsService.recordAccessStats(shortUri, request, linkAccessStatsDO);
+        } catch (Throwable e) {
+            log.error("短链接访问量统计异常", e);
+        }
     }
 
 }

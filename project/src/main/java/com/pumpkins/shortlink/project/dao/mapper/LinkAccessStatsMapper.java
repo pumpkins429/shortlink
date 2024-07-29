@@ -11,4 +11,10 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDO> {
+    /**
+     * 插入监控记录
+     * @param obj
+     * @return
+     */
+    boolean insertRecord(LinkAccessStatsDO obj);
 }
