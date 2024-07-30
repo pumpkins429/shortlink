@@ -17,6 +17,7 @@ import com.pumpkins.shortlink.project.dao.mapper.LinkGotoMapper;
 import com.pumpkins.shortlink.project.service.LinkAccessStatsService;
 import com.pumpkins.shortlink.project.service.LinkGotoService;
 import com.pumpkins.shortlink.project.service.LinkService;
+import com.pumpkins.shortlink.project.toolkit.LinkUtil;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
@@ -169,13 +170,16 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                     .findFirst()
                     .map(Cookie::getValue)
                     .ifPresentOrElse(each -> {
-                                Long added = stringRedisTemplate.opsForSet().add(RedisCacheConstants.SHORT_LINK_STATS_UV + shortUri, each);
-                                uvFirstFlag.set(added != null && added > 0L);
+                                Long uvAdded = stringRedisTemplate.opsForSet().add(RedisCacheConstants.SHORT_LINK_STATS_UV + shortUri, each);
+                                uvFirstFlag.set(uvAdded != null && uvAdded > 0L);
                             }, addResponseCookieTask
                     );
-        } else  {
+        } else {
             addResponseCookieTask.run();
         }
+        // 判断ip
+        String ip = LinkUtil.getIp((HttpServletRequest) request);
+        Long uipAdded = stringRedisTemplate.opsForSet().add(RedisCacheConstants.SHORT_LINK_STATS_UIP + shortUri, ip);
 
         Date date = new Date();
         LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
@@ -183,7 +187,7 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
                 .date(date)
                 .pv(1)
                 .uv(uvFirstFlag.get() ? 1 : 0)
-                .uip(1)
+                .uip(uipAdded != null && uipAdded > 0 ? 1 : 0)
                 .hour(DateUtil.hour(date, true))
                 .weekday(DateUtil.dayOfWeekEnum(date).getIso8601Value())
                 .build();

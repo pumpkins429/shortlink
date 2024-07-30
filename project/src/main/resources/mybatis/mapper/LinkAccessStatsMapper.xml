@@ -32,6 +32,6 @@
             UPDATE
                 pv = pv + 1,
                 uv = uv + #{uv},
-                uip = uip + 3;
+                uip = uip + #{uip};
     </insert>
 </mapper>

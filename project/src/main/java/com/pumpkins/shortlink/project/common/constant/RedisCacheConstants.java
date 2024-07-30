@@ -37,7 +37,13 @@ public class RedisCacheConstants {
     public static final Long SHORT_LINK_DEFAULT_VALIDATE_TIME = 2629800000L;
 
 
-
-    public static final String SHORT_LINK_STATS_UV = "short-link:stats_uv:";
+    /**
+     * UV
+     */
+    public static final String SHORT_LINK_STATS_UV = "short-link:stats:uv:";
+    /**
+     * UIP
+     */
+    public static final String SHORT_LINK_STATS_UIP = "short-link:stats:uip:";
 
 }
