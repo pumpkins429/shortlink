@@ -8,4 +8,6 @@ package com.pumpkins.shortlink.project.common.constant;
  */
 public class LinkConstants {
     public static final String SHORT_LINK_NOT_FOUND_PAGE = "/page/notfound";
+
+    public static final String SHORT_LINK_AMAP_URL = "https://restapi.amap.com/v3/ip?";
 }

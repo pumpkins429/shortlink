@@ -5,17 +5,23 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pumpkins.shortlink.project.common.constant.LinkConstants;
 import com.pumpkins.shortlink.project.common.constant.RedisCacheConstants;
+import com.pumpkins.shortlink.project.common.convention.exception.ClientException;
 import com.pumpkins.shortlink.project.dao.entity.LinkAccessStatsDO;
 import com.pumpkins.shortlink.project.dao.entity.LinkDO;
 import com.pumpkins.shortlink.project.dao.entity.LinkGotoDO;
+import com.pumpkins.shortlink.project.dao.entity.LinkLocaleStatsDO;
 import com.pumpkins.shortlink.project.dao.mapper.LinkGotoMapper;
 import com.pumpkins.shortlink.project.service.LinkAccessStatsService;
 import com.pumpkins.shortlink.project.service.LinkGotoService;
+import com.pumpkins.shortlink.project.service.LinkLocaleStatsService;
 import com.pumpkins.shortlink.project.service.LinkService;
 import com.pumpkins.shortlink.project.toolkit.LinkUtil;
 import jakarta.servlet.ServletRequest;
@@ -29,11 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,6 +62,15 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
     private final LinkAccessStatsService linkAccessStatsService;
+    private final LinkLocaleStatsService linkLocaleStatsService;
+
+    // 高德key
+    @Value("${short-link.stats.amap-key}")
+    private String amap_key;
+
+    // 域名
+    @Value("${short-link.domain}")
+    String domain;
 
     /**
      * 短链跳转
@@ -196,6 +213,50 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
         } catch (Throwable e) {
             log.error("短链接访问量统计异常", e);
         }
+
+        // 地区监控 TODO 待重构优化 比如这里请求高德接口，不应该每次请求都创建新对象；以及这里可以使用异步更新数据库
+        HashMap<String, Object> param = new HashMap<>();
+        param.put("key", amap_key);
+        param.put("ip", ip);
+        String url = LinkConstants.SHORT_LINK_AMAP_URL;
+        String resultJson = HttpUtil.get(url, param);
+        JSONObject jsonObject = JSON.parseObject(resultJson);
+
+        String infocode = jsonObject.getString("infocode");
+        if (StrUtil.isNotBlank(infocode) && StrUtil.equals(infocode, "10000")) {
+            String province = jsonObject.getString("province");// 可能为[]
+            String city = jsonObject.getString("city");
+            String adcode = jsonObject.getString("adcode");
+
+            // 查询分组 TODO 待优化，应该传参得到gid
+            String gid = baseMapper.selectOne(Wrappers.lambdaQuery(LinkGotoDO.class).eq(LinkGotoDO::getFullShortUrl, domain + "/" + shortUri)).getGid();
+
+            // TODO 暂时不设置gid；这里国家设为CN，因为高德api只支持中国，可以后续替换其他接口
+            boolean emptyFlag = false;
+            if ("[]".equals(adcode)) {
+                emptyFlag = true;
+            }
+            LinkLocaleStatsDO linkLocaleStatsDO = LinkLocaleStatsDO.builder()
+                    .fullShortUrl(shortUri)
+                    .gid(gid)
+                    .date(new Date())
+                    .cnt(1)
+                    .province(emptyFlag ? "" : province)
+                    .city(emptyFlag ? "" : city)
+                    .adcode(emptyFlag ? "" : adcode)
+                    .country("CN")
+                    .build();
+
+            try {
+                linkLocaleStatsService.recordLocaleStats(linkLocaleStatsDO);
+            } catch (Throwable e) {
+                log.error("短链访问地区统计数据库保存异常", e);
+            }
+
+        } else {
+            throw new ClientException("短链访问地区统计请求API异常");
+        }
     }
+
 
 }

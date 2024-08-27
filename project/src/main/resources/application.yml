@@ -36,3 +36,9 @@ spring:
 mybatis-plus:
   config-location: classpath:/mybatis/config/mybatis-config.xml
   mapper-locations: classpath:/mybatis/mapper/*.xml
+
+# 调用高德api的key 用户ip地区定位
+short-link:
+  domain: link.url
+  stats:
+    amap-key: 9ac0d8b53da3aa1e67706990002cbf8f
