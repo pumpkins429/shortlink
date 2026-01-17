@@ -256,6 +256,9 @@ public class LinkGotoServiceImpl extends ServiceImpl<LinkGotoMapper, LinkGotoDO>
         } else {
             throw new ClientException("短链访问地区统计请求API异常");
         }
+
+        // 统计操作系统
+
     }
 
 

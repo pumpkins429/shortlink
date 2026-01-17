@@ -1,31 +1,55 @@
-CREATE TABLE `t_user` (
-                          `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-                          `username` varchar(256) DEFAULT NULL COMMENT '用户名',
-                          `password` varchar(512) DEFAULT NULL COMMENT '密码',
-                          `real_name` varchar(256) DEFAULT NULL COMMENT '真实姓名',
-                          `phone` varchar(128) DEFAULT NULL COMMENT '手机号',
-                          `mail` varchar(512) DEFAULT NULL COMMENT '邮箱',
-                          `deletion_time` bigint(20) DEFAULT NULL COMMENT '注销时间戳',
-                          `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                          `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-                          `del_flag` tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
-                          PRIMARY KEY (`id`)
+-- ======================
+-- t_user 分表 (8张)
+-- ======================
+
+CREATE TABLE `t_user_0` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `username` varchar(256) DEFAULT NULL COMMENT '用户名',
+    `password` varchar(512) DEFAULT NULL COMMENT '密码',
+    `real_name` varchar(256) DEFAULT NULL COMMENT '真实姓名',
+    `phone` varchar(128) DEFAULT NULL COMMENT '手机号',
+    `mail` varchar(512) DEFAULT NULL COMMENT '邮箱',
+    `deletion_time` bigint(20) DEFAULT NULL COMMENT '注销时间戳',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+    `del_flag` tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-# 分组表
-CREATE TABLE `t_group` (
-                           `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-                           `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
-                           `name` varchar(64) DEFAULT NULL COMMENT '分组名称',
-                           `username` varchar(256) DEFAULT NULL COMMENT '创建分组用户名',
-                           `sort_order` int(3) DEFAULT NULL COMMENT '分组排序',
-                           `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                           `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-                           `del_flag` tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
-                           PRIMARY KEY (`id`),
-                           UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE,
-                           UNIQUE KEY `idx_unique_gid` (`gid`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;;
+CREATE TABLE `t_user_1` LIKE `t_user_0`;
+CREATE TABLE `t_user_2` LIKE `t_user_0`;
+CREATE TABLE `t_user_3` LIKE `t_user_0`;
+CREATE TABLE `t_user_4` LIKE `t_user_0`;
+CREATE TABLE `t_user_5` LIKE `t_user_0`;
+CREATE TABLE `t_user_6` LIKE `t_user_0`;
+CREATE TABLE `t_user_7` LIKE `t_user_0`;
+
+-- ======================
+-- t_group 分表 (8张)
+-- ======================
+
+CREATE TABLE `t_group_0` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+    `name` varchar(64) DEFAULT NULL COMMENT '分组名称',
+    `username` varchar(256) DEFAULT NULL COMMENT '创建分组用户名',
+    `sort_order` int(3) DEFAULT NULL COMMENT '分组排序',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+    `del_flag` tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_unique_username_gid` (`gid`, `username`) USING BTREE,
+    UNIQUE KEY `idx_unique_gid` (`gid`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_group_1` LIKE `t_group_0`;
+CREATE TABLE `t_group_2` LIKE `t_group_0`;
+CREATE TABLE `t_group_3` LIKE `t_group_0`;
+CREATE TABLE `t_group_4` LIKE `t_group_0`;
+CREATE TABLE `t_group_5` LIKE `t_group_0`;
+CREATE TABLE `t_group_6` LIKE `t_group_0`;
+CREATE TABLE `t_group_7` LIKE `t_group_0`;
+
 
 # 链接表
 CREATE TABLE `t_link` (
@@ -89,3 +113,22 @@ CREATE TABLE `t_link_locale_stats` (
                                        PRIMARY KEY (`id`),
                                        UNIQUE KEY `idx_unique_locale_stats` (`full_short_url`,`gid`,`date`,`adcode`,`province`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `t_link_os_stats`
+(
+    `id`             bigint   NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `full_short_url` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '完整短链接',
+    `gid`            varchar(32) COLLATE utf8mb4_general_ci  DEFAULT NULL COMMENT '分组标识',
+    `date`           date                                    DEFAULT NULL COMMENT '日期',
+    `cnt`            int                                     DEFAULT NULL COMMENT '访问量',
+    `os`             varchar(64) COLLATE utf8mb4_general_ci  DEFAULT NULL COMMENT '操作系统',
+    `create_time`    datetime                                DEFAULT NULL COMMENT '创建时间',
+    `update_time`    datetime NOT NULL COMMENT '修改时间',
+    `del_flag`       tinyint(1)                              DEFAULT NULL COMMENT '删除标识 0表示删除 1表示未删除',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_unique_locale_stats` (`full_short_url`, `gid`, `date`, `os`) USING BTREE
+) COMMENT = '短链接监控操作系统访问状态'
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_general_ci;
